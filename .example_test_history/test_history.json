@@ -1,0 +1,994 @@
+{
+  "ExampleProject": [
+    {
+      "run_id": "run_0",
+      "timestamp": "2025-05-27T15:30:13.904952",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "duration": 45.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.0,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "failed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_1",
+      "timestamp": "2025-05-27T15:30:13.905065",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 46.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.1,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "failed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_2",
+      "timestamp": "2025-05-27T15:30:13.905269",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 47.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_3",
+      "timestamp": "2025-05-27T15:30:13.905570",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 48.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.3,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_4",
+      "timestamp": "2025-05-27T15:30:13.905940",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 49.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.4,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_5",
+      "timestamp": "2025-05-27T15:30:13.906332",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 50.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.5,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_6",
+      "timestamp": "2025-05-27T15:30:13.906753",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 51.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.6,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_7",
+      "timestamp": "2025-05-27T15:30:13.907252",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 52.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.7000000000000002,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_8",
+      "timestamp": "2025-05-27T15:30:13.907740",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 53.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.8,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_9",
+      "timestamp": "2025-05-27T15:30:13.908241",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 54.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.9,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_0",
+      "timestamp": "2025-05-27T15:30:31.077283",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "duration": 45.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.0,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "failed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_1",
+      "timestamp": "2025-05-27T15:30:31.077951",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 46.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.1,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "failed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_2",
+      "timestamp": "2025-05-27T15:30:31.078585",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 47.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_3",
+      "timestamp": "2025-05-27T15:30:31.079251",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 48.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.3,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_4",
+      "timestamp": "2025-05-27T15:30:31.079939",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 49.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.4,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_5",
+      "timestamp": "2025-05-27T15:30:31.080622",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 50.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.5,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_6",
+      "timestamp": "2025-05-27T15:30:31.081460",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 51.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.6,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_7",
+      "timestamp": "2025-05-27T15:30:31.082282",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 52.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.7000000000000002,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_8",
+      "timestamp": "2025-05-27T15:30:31.083070",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 53.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.8,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_9",
+      "timestamp": "2025-05-27T15:30:31.083882",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 54.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.9,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_0",
+      "timestamp": "2025-05-27T15:38:17.622167",
+      "summary": {
+        "total": 4,
+        "passed": 2,
+        "failed": 2,
+        "skipped": 0,
+        "duration": 45.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.0,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "failed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_1",
+      "timestamp": "2025-05-27T15:38:17.623101",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 46.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.1,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "failed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_2",
+      "timestamp": "2025-05-27T15:38:17.624004",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 47.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_3",
+      "timestamp": "2025-05-27T15:38:17.625011",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 48.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.3,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_4",
+      "timestamp": "2025-05-27T15:38:17.625961",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 49.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.4,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_5",
+      "timestamp": "2025-05-27T15:38:17.626986",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 50.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.5,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_6",
+      "timestamp": "2025-05-27T15:38:17.628000",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 51.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.6,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_7",
+      "timestamp": "2025-05-27T15:38:17.629044",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 52.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.7000000000000002,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_8",
+      "timestamp": "2025-05-27T15:38:17.630156",
+      "summary": {
+        "total": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0,
+        "duration": 53.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "passed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.8,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    },
+    {
+      "run_id": "run_9",
+      "timestamp": "2025-05-27T15:38:17.631245",
+      "summary": {
+        "total": 4,
+        "passed": 3,
+        "failed": 1,
+        "skipped": 0,
+        "duration": 54.2
+      },
+      "tests": {
+        "ExampleProject::test_core_functionality": {
+          "outcome": "passed",
+          "duration": 1.2,
+          "error": null
+        },
+        "ExampleProject::test_flaky_feature": {
+          "outcome": "failed",
+          "duration": 0.8,
+          "error": null
+        },
+        "ExampleProject::test_slow_operation": {
+          "outcome": "passed",
+          "duration": 1.9,
+          "error": null
+        },
+        "ExampleProject::test_edge_case": {
+          "outcome": "passed",
+          "duration": 0.5,
+          "error": null
+        }
+      }
+    }
+  ]
+}

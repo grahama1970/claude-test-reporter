@@ -1,0 +1,25 @@
+{
+  "ExampleProject": {
+    "updated_at": "2025-05-27T15:38:17.632261",
+    "tests": {
+      "ExampleProject::test_flaky_feature": {
+        "flakiness_score": 0.8,
+        "pass_rate": 60.0,
+        "fail_rate": 40.0,
+        "total_runs": 20,
+        "recent_pattern": "FPPFPPFPPF",
+        "last_outcome": "failed",
+        "detected_at": "2025-05-27T15:38:17.632219"
+      },
+      "ExampleProject::test_edge_case": {
+        "flakiness_score": 0.4,
+        "pass_rate": 80.0,
+        "fail_rate": 20.0,
+        "total_runs": 20,
+        "recent_pattern": "FFPPPPPPPP",
+        "last_outcome": "passed",
+        "detected_at": "2025-05-27T15:38:17.632225"
+      }
+    }
+  }
+}
