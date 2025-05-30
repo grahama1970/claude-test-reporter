@@ -31,6 +31,9 @@ from claude_test_reporter.core.generators.multi_project_dashboard import MultiPr
 from claude_test_reporter.core.tracking import TestHistoryTracker
 from claude_test_reporter.core.adapters import AgentReportAdapter
 from claude_test_reporter import get_report_config
+from claude_test_reporter.analyzers import LLMTestAnalyzer, TestReportVerifier
+from claude_test_reporter.core.test_result_verifier import TestResultVerifier, HallucinationDetector
+from claude_test_reporter.config import Config, setup_environment
 from .slash_mcp_mixin import add_slash_mcp_commands
 from .validate import validate
 from .code_review import code_review
@@ -310,11 +313,17 @@ def format(
 
 
 @app.command()
+def setup():
+    """Interactive setup for environment configuration."""
+    setup_environment()
+
+
+@app.command()
 def version():
     """Show version information."""
     console.print("[cyan]Claude Test Reporter[/cyan]")
-    console.print("Version: 1.0.0")
-    console.print("Generate test reports optimized for AI analysis")
+    console.print("Version: 0.2.1")
+    console.print("Generate test reports optimized for AI analysis with hallucination prevention")
 
 
 @app.command()
@@ -327,7 +336,9 @@ def health():
     deps = {
         "jinja2": "Template engine",
         "pytest": "Test framework",
-        "rich": "Terminal formatting"
+        "rich": "Terminal formatting",
+        "llm_call": "LLM integration",
+        "typer": "CLI framework"
     }
     
     all_good = True
@@ -343,6 +354,188 @@ def health():
         console.print("\n[green]✓ All dependencies are installed![/green]")
     else:
         console.print("\n[yellow]⚠ Some dependencies are missing[/yellow]")
+
+
+@app.command(name="verify-test-results")
+def verify_test_results(
+    json_file: Path = typer.Argument(..., help="Test results JSON file"),
+    output: Path = typer.Option("verified_results.json", "--output", "-o", help="Output file"),
+    format: str = typer.Option("json", "--format", "-f", help="Output format (json/text)")
+):
+    """Create cryptographically verified test results to prevent hallucinations."""
+    if not json_file.exists():
+        console.print(f"[red]Error:[/red] File not found: {json_file}")
+        raise typer.Exit(1)
+    
+    try:
+        with open(json_file) as f:
+            test_results = json.load(f)
+        
+        # Create verifier
+        verifier = TestResultVerifier()
+        
+        if format == "json":
+            # Create immutable record
+            record = verifier.create_immutable_test_record(test_results)
+            output.write_text(json.dumps(record, indent=2))
+            
+            console.print(f"[green]✓[/green] Verified record created: {output}")
+            console.print(f"  Hash: {record['verification']['hash'][:16]}...")
+            console.print(f"  Failed tests: {record['immutable_facts']['failed_count']}")
+            console.print(f"  Deployment: {'BLOCKED' if record['immutable_facts']['failed_count'] > 0 else 'ALLOWED'}")
+        else:
+            # Create text summary
+            summary = TestReportVerifier().create_verified_summary(test_results)
+            output.write_text(summary)
+            console.print(f"[green]✓[/green] Verified summary created: {output}")
+            
+    except Exception as e:
+        console.print(f"[red]Error verifying results:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@app.command(name="llm-analyze")
+def llm_analyze(
+    json_file: Path = typer.Argument(..., help="Test results JSON file"),
+    project: str = typer.Argument(..., help="Project name"),
+    model: str = typer.Option("gemini-2.5-pro", "--model", "-m", help="LLM model to use"),
+    output: Path = typer.Option("llm_analysis.json", "--output", "-o", help="Output file"),
+    temperature: float = typer.Option(0.1, "--temperature", "-t", help="LLM temperature (0.0-1.0)")
+):
+    """Analyze test results with LLM (Gemini 2.5 Pro) for insights."""
+    if not json_file.exists():
+        console.print(f"[red]Error:[/red] File not found: {json_file}")
+        raise typer.Exit(1)
+    
+    try:
+        with open(json_file) as f:
+            test_results = json.load(f)
+        
+        console.print(f"[cyan]Analyzing with {model}...[/cyan]")
+        
+        # Create analyzer
+        analyzer = LLMTestAnalyzer(model=model, temperature=temperature)
+        
+        # Generate analysis
+        report_path = analyzer.generate_anti_hallucination_report(
+            test_results, project, str(output)
+        )
+        
+        console.print(f"[green]✓[/green] Analysis complete: {report_path}")
+        
+        # Load and show key findings
+        with open(report_path) as f:
+            report = json.load(f)
+        
+        analysis = report.get("llm_analysis", {})
+        if "error" not in analysis:
+            # Show summary
+            summary = analysis.get("summary", {})
+            console.print(f"\n[bold]Analysis Summary:[/bold]")
+            console.print(f"  Status: {summary.get('overall_status', 'unknown')}")
+            console.print(f"  Confidence: {summary.get('confidence_level', 'unknown')}")
+            console.print(f"  Deployment Ready: {'Yes' if summary.get('requires_immediate_action') == False else 'No'}")
+            
+            # Show top recommendations
+            recs = analysis.get("recommendations", [])
+            if recs:
+                console.print(f"\n[bold]Top Recommendations:[/bold]")
+                for i, rec in enumerate(recs[:3], 1):
+                    console.print(f"  {i}. [{rec['priority']}] {rec['action']}")
+        else:
+            console.print(f"[yellow]Analysis failed: {analysis['error']}[/yellow]")
+            
+    except Exception as e:
+        console.print(f"[red]Error during LLM analysis:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@app.command(name="check-hallucination")
+def check_hallucination(
+    results_file: Path = typer.Argument(..., help="Verified test results JSON"),
+    response_file: Path = typer.Argument(..., help="LLM or agent response text file"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file for detailed report")
+):
+    """Check an LLM/agent response for hallucinations about test results."""
+    if not results_file.exists() or not response_file.exists():
+        console.print("[red]Error:[/red] One or more files not found")
+        raise typer.Exit(1)
+    
+    try:
+        # Load verified results
+        with open(results_file) as f:
+            verified_record = json.load(f)
+        
+        # Load response text
+        response_text = response_file.read_text()
+        
+        # Create detector
+        detector = HallucinationDetector()
+        
+        # Check for hallucinations
+        result = detector.check_response(response_text, verified_record)
+        
+        # Display results
+        if result["hallucinations_detected"]:
+            console.print(f"[red]❌ Hallucinations detected: {result['detection_count']} issues[/red]\n")
+            
+            for detection in result["detections"]:
+                severity_color = "red" if detection["severity"] == "critical" else "yellow"
+                console.print(f"[{severity_color}]• {detection['type']}:[/{severity_color}]")
+                console.print(f"  {detection['details']}")
+                console.print(f"  Expected: {detection['expected']}\n")
+        else:
+            console.print("[green]✓ No hallucinations detected![/green]")
+            console.print("The response accurately reflects the test results.")
+        
+        # Save detailed report if requested
+        if output:
+            report = {
+                "timestamp": typer.get_app_dir("claude-test-reporter"),
+                "verified_results": verified_record,
+                "response_analyzed": response_text[:500] + "..." if len(response_text) > 500 else response_text,
+                "hallucination_check": result
+            }
+            output.write_text(json.dumps(report, indent=2))
+            console.print(f"\n[green]✓[/green] Detailed report saved: {output}")
+            
+    except Exception as e:
+        console.print(f"[red]Error checking hallucinations:[/red] {e}")
+        raise typer.Exit(1)
+
+
+@app.command(name="create-llm-prompt")
+def create_llm_prompt(
+    json_file: Path = typer.Argument(..., help="Test results JSON file"),
+    output: Optional[Path] = typer.Option(None, "--output", "-o", help="Output file"),
+    style: str = typer.Option("strict", "--style", "-s", help="Prompt style (strict/friendly)")
+):
+    """Create an LLM prompt that enforces accurate test reporting."""
+    if not json_file.exists():
+        console.print(f"[red]Error:[/red] File not found: {json_file}")
+        raise typer.Exit(1)
+    
+    try:
+        with open(json_file) as f:
+            test_results = json.load(f)
+        
+        # Create verifier
+        verifier = TestResultVerifier()
+        
+        # Generate prompt
+        prompt = verifier.create_llm_prompt_template(test_results)
+        
+        # Output
+        if output:
+            output.write_text(prompt)
+            console.print(f"[green]✓[/green] LLM prompt saved: {output}")
+        else:
+            console.print("[bold]LLM Prompt:[/bold]")
+            console.print(prompt)
+            
+    except Exception as e:
+        console.print(f"[red]Error creating prompt:[/red] {e}")
+        raise typer.Exit(1)
 
 
 # Add slash command and MCP generation capabilities
