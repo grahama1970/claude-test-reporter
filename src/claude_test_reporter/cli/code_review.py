@@ -1,20 +1,69 @@
-✅ Comparison complete!")
-            click.echo(f"📊 Comparison saved to: {result['comparison_path']}")
+"""Code review command for the CLI."""
+import sys
+from pathlib import Path
+from typing import Optional
+
+import click
+from rich.console import Console
+
+console = Console()
+
+
+@click.command()
+@click.option("--repo", "-r", default=".", help="Repository path to review")
+@click.option("--model", "-m", default="gemini-2.5-pro", help="LLM model to use")
+@click.option("--custom-prompt", "-p", help="Custom prompt for the review")
+@click.option("--temperature", "-t", default=0.3, type=float, help="LLM temperature")
+@click.option("--output", "-o", help="Output file path")
+@click.option("--compare", is_flag=True, help="Compare reviews from multiple models")
+@click.option("--verbose", "-v", is_flag=True, help="Verbose output")
+def code_review(repo: str, model: str, custom_prompt: Optional[str], 
+                temperature: float, output: Optional[str], compare: bool, 
+                verbose: bool) -> None:
+    """Perform AI-powered code review on a repository."""
+    try:
+        from claude_test_reporter.core.code_reviewer import CodeReviewer
+    except ImportError:
+        console.print("[red]Error: code_reviewer module not available[/red]")
+        sys.exit(1)
+    
+    reviewer = CodeReviewer(model=model)
+    repo_path = Path(repo).resolve()
+    
+    if not repo_path.exists():
+        console.print(f"[red]Repository not found: {repo_path}[/red]")
+        sys.exit(1)
+    
+    console.print(f"[blue]Reviewing repository: {repo_path}[/blue]")
+    console.print(f"[blue]Using model: {model}[/blue]")
+    
+    if compare:
+        # Compare multiple models
+        models = ["gemini-2.5-pro", "claude-3-5-sonnet-20241022"]
+        result = reviewer.compare_reviews(
+            repo_path=str(repo_path),
+            models=models,
+            custom_prompt=custom_prompt,
+            temperature=temperature
+        )
+        
+        if result["success"]:
+            console.print("\n[green]✅ Comparison complete![/green]")
+            console.print(f"[blue]📊 Comparison saved to: {result['comparison_path']}[/blue]")
             
             # Show summary
             if verbose:
-                click.echo("\nReview Summary:")
+                console.print("\n[bold]Review Summary:[/bold]")
                 for model_name, review_result in result["reviews"].items():
                     status = "✅" if review_result["success"] else "❌"
-                    click.echo(f"  {status} {model_name}")
+                    console.print(f"  {status} {model_name}")
         else:
-            click.echo(f"❌ {result['message']}")
+            console.print(f"[red]❌ {result['message']}[/red]")
             sys.exit(1)
-            
     else:
         # Single model review
         result = reviewer.review_repository(
-            repo_path=repo,
+            repo_path=str(repo_path),
             custom_prompt=custom_prompt,
             temperature=temperature,
             output_path=output
@@ -22,24 +71,15 @@
         
         if result["success"]:
             if output:
-                click.echo(f"\n✅ Review complete!")
+                console.print(f"\n[green]✅ Review complete![/green]")
+                console.print(f"[blue]📊 Review saved to: {output}[/blue]")
             else:
                 # Print to stdout if no output file specified
-                click.echo("\n" + "="*60 + "\n")
-                click.echo(result["report"]["review"])
-                click.echo("\n" + "="*60)
-                
-            # Show statistics if verbose
-            if verbose and "statistics" in result["report"]:
-                stats = result["report"]["statistics"]
-                click.echo(f"\n📊 Change Statistics:")
-                click.echo(f"  Total Files: {stats['total_files']}")
-                click.echo(f"  Total Changes: {stats['total_changes']}")
-                click.echo(f"  Staged: {stats['staged']['files']} files")
-                click.echo(f"  Untracked: {stats['untracked_files']} files")
-                
+                console.print("\n" + "="*60 + "\n")
+                console.print(result["report"]["review"])
+                console.print("\n" + "="*60)
         else:
-            click.echo(f"❌ {result['message']}")
+            console.print(f"[red]❌ {result['message']}[/red]")
             sys.exit(1)
 
 
