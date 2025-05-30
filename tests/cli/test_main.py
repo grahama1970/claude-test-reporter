@@ -1,9 +1,6 @@
 """Tests for the CLI main module."""
 import pytest
 from unittest.mock import Mock, patch
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../src'))
 
 # Test basic imports work
 def test_cli_imports():

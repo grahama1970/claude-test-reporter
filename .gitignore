@@ -19,6 +19,9 @@ build/
 results.json
 test_results_*.json
 comparison.json
+logs/
+verified_results.json
+hallucination_dashboard.html
 
 # IDE
 .vscode/

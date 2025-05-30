@@ -1,9 +1,6 @@
 """Tests for the test result verifier module."""
 import pytest
 from pathlib import Path
-import sys
-import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../src'))
 from claude_test_reporter.core.test_result_verifier import TestResultVerifier, HallucinationDetector
 
 

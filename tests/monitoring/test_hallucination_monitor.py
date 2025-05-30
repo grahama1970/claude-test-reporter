@@ -1,9 +1,7 @@
 """Tests for the hallucination monitoring module."""
 import pytest
 from unittest.mock import Mock, patch
-import sys
 import os
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../src'))
 from claude_test_reporter.monitoring.hallucination_monitor import HallucinationMonitor, HallucinationDashboard
 
 
