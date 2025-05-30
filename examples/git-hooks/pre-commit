@@ -1,0 +1,93 @@
+#!/bin/bash
+# Pre-commit hook for automated code review
+
+# Configuration
+CLAUDE_MAX_PROXY_PATH="/home/graham/workspace/experiments/claude_max_proxy"
+MODEL="${GIT_REVIEW_MODEL:-gemini/gemini-2.5-pro-preview-05-06}"
+MIN_REVIEW_TIME=2  # Skip if changes are trivial
+
+echo "🔍 Running automated code review..."
+
+# Check if we have any changes
+if git diff --cached --quiet; then
+    echo "No staged changes to review."
+    exit 0
+fi
+
+# Count changed lines
+CHANGED_LINES=$(git diff --cached --numstat | awk '{ adds += $1; subs += $2 } END { print adds + subs }')
+
+# Skip review for very small changes
+if [ "$CHANGED_LINES" -lt 5 ]; then
+    echo "✅ Skipping review for minor changes ($CHANGED_LINES lines)"
+    exit 0
+fi
+
+# Create temporary file for review
+REVIEW_FILE=$(mktemp /tmp/git-review-XXXXXX.md)
+
+# Run the review
+cd "$CLAUDE_MAX_PROXY_PATH"
+python -m llm_call.tools.git_reviewer \
+    -m "$MODEL" \
+    -t 0.3 \
+    -o "$REVIEW_FILE" 2>&1
+
+# Check if review succeeded
+if [ $? -ne 0 ]; then
+    echo "⚠️  Code review failed. Continuing with commit..."
+    rm -f "$REVIEW_FILE"
+    exit 0
+fi
+
+# Check for critical issues
+CRITICAL_FOUND=false
+if grep -iE "critical|security.*(high|vulnerability)|injection|hardcoded.*(password|secret|key)" "$REVIEW_FILE" > /dev/null; then
+    CRITICAL_FOUND=true
+fi
+
+# Display summary
+echo ""
+echo "📋 Code Review Summary:"
+echo "------------------------"
+head -n 20 "$REVIEW_FILE" | grep -E "^[1-9*-]|Security|Performance|Bug|Critical|High"
+echo ""
+echo "Full review saved to: $REVIEW_FILE"
+
+# If critical issues found, ask for confirmation
+if [ "$CRITICAL_FOUND" = true ]; then
+    echo ""
+    echo "⚠️  CRITICAL ISSUES DETECTED!"
+    echo ""
+    echo "Do you want to:"
+    echo "  v) View the full review"
+    echo "  c) Continue with commit anyway"
+    echo "  a) Abort commit (default)"
+    echo ""
+    read -p "Choice [a/c/v]: " -n 1 -r
+    echo ""
+    
+    case "$REPLY" in
+        v|V)
+            less "$REVIEW_FILE"
+            echo ""
+            read -p "Continue with commit? [y/N]: " -n 1 -r
+            echo ""
+            if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                rm -f "$REVIEW_FILE"
+                exit 1
+            fi
+            ;;
+        c|C)
+            echo "Continuing with commit despite critical issues..."
+            ;;
+        *)
+            echo "Commit aborted. Please fix the issues and try again."
+            echo "Review saved at: $REVIEW_FILE"
+            exit 1
+            ;;
+    esac
+fi
+
+echo "✅ Code review complete. Proceeding with commit..."
+exit 0

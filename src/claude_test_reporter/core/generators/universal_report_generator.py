@@ -18,7 +18,7 @@ import urllib.parse # For parsing base_url
 import re
 
 # Import from within the same package if report_config is used by this module
-# from claude_test_reporter.report_config import get_report_config # Example if it were used
+# from claude_test_reporter.core.report_config import get_report_config # Example if it were used
 
 class UniversalReportGenerator:
     """Generate beautiful HTML reports with sort, search, and export features."""

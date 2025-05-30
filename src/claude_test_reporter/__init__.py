@@ -1,9 +1,34 @@
-"""
-Claude Test Reporter - Universal test reporting for Claude companion projects
-"""
+"""Claude Test Reporter - Universal test reporting engine for Claude companion projects."""
 
-from .report_config import get_report_config, REPORT_CONFIGS
-from .test_reporter import TestReporter, ReportGenerator
+# Import core functionality
+from claude_test_reporter.core.test_reporter import TestReporter
+from claude_test_reporter.core.report_config import get_report_config
 
-__version__ = "0.2.1"
-__all__ = ["get_report_config", "REPORT_CONFIGS", "TestReporter", "ReportGenerator"]
+# Import generators
+try:
+    from claude_test_reporter.core.generators import (
+        UniversalReportGenerator,
+        MultiProjectDashboard,
+        # HistoryReportGenerator might not exist yet
+    )
+except ImportError:
+    # Handle missing imports gracefully during migration
+    pass
+
+# Import adapters
+try:
+    from claude_test_reporter.core.adapters import (
+        # These might have different names
+        AgentReportAdapter,
+    )
+except ImportError:
+    pass
+
+__version__ = "0.1.0"
+__all__ = [
+    "TestReporter",
+    "get_report_config",
+    "UniversalReportGenerator",
+    "MultiProjectDashboard",
+    "AgentReportAdapter",
+]

@@ -1,0 +1,49 @@
+#!/bin/bash
+# Git code review using claude-test-reporter
+# This is the main entry point that handles git operations
+
+set -e
+
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
+
+# Default values
+MODEL="${GIT_REVIEW_MODEL:-gemini/gemini-2.5-pro-preview-05-06}"
+OUTPUT_DIR="${GIT_REVIEW_OUTPUT_DIR:-./code-reviews}"
+
+# Simple argument parsing
+ARGS=""
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            echo "Git Code Review - Using claude-test-reporter with claude_max_proxy"
+            echo ""
+            echo "Usage: $0 [options]"
+            echo ""
+            echo "Options:"
+            echo "  -m, --model MODEL      LLM model to use (default: $MODEL)"
+            echo "  -o, --output FILE      Output file for review"
+            echo "  -c, --compare          Compare reviews from multiple models"
+            echo "  -p, --prompt FILE      Custom review prompt file"
+            echo "  -t, --temperature T    Temperature for LLM (default: 0.3)"
+            echo "  -v, --verbose          Show detailed output"
+            echo "  -h, --help            Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0                     # Basic review with default model"
+            echo "  $0 -m claude-3-opus    # Use Claude Opus"
+            echo "  $0 --compare           # Compare multiple models"
+            echo "  $0 -o review.md        # Save to specific file"
+            exit 0
+            ;;
+        *)
+            ARGS="$ARGS $1"
+            shift
+            ;;
+    esac
+done
+
+# Run the code review
+cd "$PROJECT_DIR"
+python -m claude_test_reporter.cli.main code-review $ARGS

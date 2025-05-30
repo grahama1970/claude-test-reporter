@@ -1,0 +1,41 @@
+#!/bin/bash
+# Pre-push hook for comprehensive code review
+
+# Configuration
+CLAUDE_MAX_PROXY_PATH="/home/graham/workspace/experiments/claude_max_proxy"
+REVIEWS_DIR=".code-reviews"
+COMPARE_MODELS="${GIT_REVIEW_COMPARE:-false}"
+
+echo "🚀 Running comprehensive code review before push..."
+
+# Create reviews directory if it doesn't exist
+mkdir -p "$REVIEWS_DIR"
+
+# Get branch name
+BRANCH=$(git branch --show-current)
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+
+# Run comprehensive review
+cd "$CLAUDE_MAX_PROXY_PATH"
+
+if [ "$COMPARE_MODELS" = "true" ]; then
+    echo "📊 Comparing reviews from multiple models..."
+    python -m llm_call.tools.git_reviewer \
+        --compare \
+        --models gemini/gemini-2.5-pro-preview-05-06 claude-3-opus-20240229 \
+        -t 0.3
+else
+    echo "🤖 Getting review from primary model..."
+    python -m llm_call.tools.git_reviewer \
+        -m claude-3-opus-20240229 \
+        -t 0.3 \
+        -o "$REVIEWS_DIR/push-review-$BRANCH-$TIMESTAMP.md"
+fi
+
+echo ""
+echo "✅ Code review complete!"
+echo "📁 Reviews saved in: $REVIEWS_DIR/"
+echo ""
+echo "Proceeding with push..."
+
+exit 0

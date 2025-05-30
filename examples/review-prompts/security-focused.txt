@@ -1,0 +1,37 @@
+=== SECURITY-FOCUSED CODE REVIEW ===
+
+Please perform a comprehensive security audit of these code changes with special attention to:
+
+1. **Authentication & Authorization**
+   - Improper access controls
+   - Missing authentication checks
+   - Privilege escalation risks
+
+2. **Input Validation & Sanitization**
+   - SQL injection vulnerabilities
+   - Command injection risks
+   - Path traversal attacks
+   - XSS vulnerabilities
+
+3. **Sensitive Data Handling**
+   - Hardcoded credentials or secrets
+   - Insecure data transmission
+   - Inadequate encryption
+   - Logging of sensitive information
+
+4. **Dependencies & Supply Chain**
+   - Vulnerable dependencies
+   - Unnecessary permissions
+   - Untrusted sources
+
+5. **Error Handling & Information Disclosure**
+   - Stack traces in production
+   - Verbose error messages
+   - Debug information leakage
+
+6. **Concurrency & Race Conditions**
+   - TOCTOU vulnerabilities
+   - Resource locking issues
+   - Thread safety problems
+
+Please rate each finding by severity (Critical/High/Medium/Low) and provide specific remediation steps.
