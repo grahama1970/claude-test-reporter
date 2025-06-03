@@ -24,6 +24,15 @@ try:
 except ImportError:
     pass
 
+# Import agent integration
+try:
+    from claude_test_reporter.agent_integration import (
+        AgentTestValidator,
+        should_call_judge
+    )
+except ImportError:
+    pass
+
 __version__ = "0.1.0"
 __all__ = [
     "TestReporter",
@@ -31,4 +40,13 @@ __all__ = [
     "UniversalReportGenerator",
     "MultiProjectDashboard",
     "AgentReportAdapter",
+    "AgentTestValidator",
+    "should_call_judge",
 ]
+
+# Export pytest plugin hooks for plugin discovery
+from claude_test_reporter.pytest_plugin import (
+    pytest_addoption,
+    pytest_configure,
+    pytest_unconfigure
+)

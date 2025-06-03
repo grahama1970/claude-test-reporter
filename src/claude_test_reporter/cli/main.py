@@ -538,8 +538,124 @@ def create_llm_prompt(
         raise typer.Exit(1)
 
 
+# Add the validate command with clear judge model description
+app.add_typer(
+    validate,
+    name="validate",
+    help="🧑‍⚖️ Use JUDGE MODEL (LLM) to validate test quality - IMPORTANT: Run this when ALL tests pass!"
+)
+
+# Add the code review command
+app.add_typer(
+    code_review,
+    name="code-review",
+    help="Review code changes using LLM for quality and security issues"
+)
+
 # Add slash command and MCP generation capabilities
 add_slash_mcp_commands(app, command_prefix="generate")
+
+
+@app.command(name="judge")
+def judge_command(
+    json_file: Path = typer.Argument(..., help="Test results JSON file"),
+    output: Path = typer.Option("judge_validation.json", "--output", "-o", help="Output file"),
+    model: str = typer.Option("gemini-2.5-pro", "--model", "-m", help="Judge model to use (default: Gemini 2.5 Pro)"),
+    strict: bool = typer.Option(True, "--strict", help="Fail on any quality issues found")
+):
+    """
+    🧑‍⚖️ REQUEST SECOND OPINION from JUDGE MODEL when all tests pass.
+    
+    The JUDGE MODEL is an external LLM (Gemini 2.5 Pro) that validates test quality.
+    
+    WHEN TO USE THIS:
+    • ✅ When ALL tests pass (100% success) - most important!
+    • ✅ Before deployment decisions
+    • ✅ After fixing all test failures
+    • ✅ When test results seem too good to be true
+    
+    The judge detects:
+    • Lazy tests (e.g., assert True)
+    • Incomplete tests (missing assertions)
+    • Hallucinated tests (don't test what they claim)
+    • Flaky tests (timing dependencies)
+    
+    Example:
+        claude-test-reporter judge test_results.json
+        claude-test-reporter judge test_results.json --strict --model gemini-2.5-pro
+    """
+    if not json_file.exists():
+        console.print(f"[red]Error:[/red] File not found: {json_file}")
+        raise typer.Exit(1)
+    
+    try:
+        # Load test results
+        with open(json_file) as f:
+            test_results = json.load(f)
+        
+        # Check if validation is needed
+        summary = test_results.get('summary', {})
+        total = summary.get('total', 0)
+        failed = summary.get('failed', 0)
+        
+        if failed == 0 and total > 0:
+            console.print("[green]✅ All tests passed![/green]")
+            console.print("[yellow]🔍 This is exactly when judge validation is most important![/yellow]\n")
+        
+        # Create validator
+        from claude_test_reporter.core.test_validator import TestValidator
+        validator = TestValidator(model=f"gemini/{model}" if "gemini" in model else model)
+        
+        console.print(f"[cyan]🧑‍⚖️ Requesting second opinion from {model} judge model...[/cyan]\n")
+        
+        # Validate all tests
+        validation_results = validator.validate_all_tests(test_results)
+        
+        # Save results
+        with open(output, 'w') as f:
+            json.dump(validation_results, f, indent=2)
+        
+        # Display summary
+        summary = validation_results.get('summary', {})
+        problematic = summary.get('problematic_tests', [])
+        categories = summary.get('categories', {})
+        
+        console.print(f"[bold]📋 Judge Model Validation Complete[/bold]")
+        console.print(f"Model: {validation_results.get('model')}")
+        console.print(f"Tests validated: {validation_results.get('total_tests')}")
+        console.print()
+        
+        # Show categories
+        if categories:
+            console.print("[bold]Test Quality Categories:[/bold]")
+            for category, count in categories.items():
+                icon = "✅" if category == "good" else "⚠️"
+                console.print(f"  {icon} {category}: {count}")
+        
+        # Check for issues
+        quality_issues = ['lazy', 'hallucinated', 'incomplete', 'flaky']
+        issues_found = any(cat in categories for cat in quality_issues)
+        
+        if issues_found and strict:
+            console.print(f"\n[red]❌ VALIDATION FAILED - Quality issues detected[/red]")
+            console.print(f"[red]Found {len(problematic)} problematic tests[/red]")
+            console.print("\n[yellow]Action required: Fix test quality issues before deployment[/yellow]")
+            raise typer.Exit(1)
+        elif issues_found:
+            console.print(f"\n[yellow]⚠️  Quality issues found in {len(problematic)} tests[/yellow]")
+            console.print("Consider fixing these before deployment")
+        else:
+            console.print("\n[green]✅ All tests validated - good quality![/green]")
+            console.print("[green]Safe to deploy[/green]")
+        
+        console.print(f"\n[dim]Full validation report saved: {output}[/dim]")
+        
+    except ImportError:
+        console.print("[red]Error: Test validator not available. Install llm_call dependency.[/red]")
+        raise typer.Exit(1)
+    except Exception as e:
+        console.print(f"[red]Error during validation:[/red] {e}")
+        raise typer.Exit(1)
 
 
 def main():

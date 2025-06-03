@@ -21,7 +21,6 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Testing",
-    "Framework :: Pytest",
 ]
 
 # Core dependencies
@@ -36,7 +35,6 @@ dependencies = [
     "pydantic>=2.11.5",
     "pydantic-settings>=2.9.1",
     "aiohttp>=3.12.7",
-    "pytest>=8.0.0",
 ]
 
 [project.optional-dependencies]
@@ -52,9 +50,6 @@ dev = [
 
 [project.scripts]
 claude-test-reporter = "claude_test_reporter.cli.main:app"
-
-[project.entry-points.pytest11]
-claude_test_reporter = "claude_test_reporter.pytest_plugin"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/claude_test_reporter"]

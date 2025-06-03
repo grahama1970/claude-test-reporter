@@ -30,14 +30,20 @@ class AgentReportAdapter:
         passed = sum(1 for t in tests if t["outcome"] == "passed")
         failed = sum(1 for t in tests if t["outcome"] == "failed")
         skipped = sum(1 for t in tests if t["outcome"] == "skipped")
+        total = len(tests)
+        
+        all_passed = failed + skipped == 0
+        success_rate = (passed / total * 100) if total > 0 else 0
         
         return {
-            "all_passed": failed + skipped == 0,
+            "all_passed": all_passed,
             "requires_action": failed + skipped > 0,
             "failure_count": failed,
             "skipped_count": skipped,
             "passed_count": passed,
-            "success_rate": (passed / len(tests) * 100) if tests else 0
+            "success_rate": success_rate,
+            "validation_recommended": all_passed and total > 0,
+            "validation_reason": "All tests passed - recommend judge model validation for test quality" if all_passed and total > 0 else None
         }
     
     def get_failed_tests(self) -> List[Dict[str, Any]]:
@@ -56,8 +62,19 @@ class AgentReportAdapter:
     def get_actionable_items(self) -> List[Dict[str, Any]]:
         """Get prioritized list of actions to take."""
         actions = []
+        status = self.get_quick_status()
         failed_tests = self.get_failed_tests()
-
+        
+        # Check if validation is recommended FIRST
+        if status.get("validation_recommended", False):
+            actions.append({
+                "priority": "critical",
+                "error_type": "ValidationNeeded",
+                "affected_tests": [],
+                "count": 0,
+                "suggested_fix": "All tests passed - run judge model validation: claude-test-reporter validate results.json --fail-on-category lazy --fail-on-category hallucinated",
+                "reason": status.get("validation_reason")
+            })
         
         # Group by error type
         error_groups = {}
@@ -78,7 +95,7 @@ class AgentReportAdapter:
             })
         
         # Add skipped tests
-        skipped_count = self.get_quick_status()["skipped_count"]
+        skipped_count = status["skipped_count"]
         if skipped_count > 0:
             actions.append({
                 "priority": "high",

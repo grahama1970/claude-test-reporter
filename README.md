@@ -78,6 +78,33 @@ generator = UniversalReportGenerator(**config)
 
 ## Advanced Features
 
+### Judge Model Validation (Second Opinion)
+
+When all tests pass, it's important to verify test quality. The reporter includes a "judge model" feature that uses external LLMs to provide second opinions on test results:
+
+```bash
+# Request validation when all tests pass
+claude-test-reporter validate results.json --model gemini-2.5-pro
+
+# Validate with specific categories to check
+claude-test-reporter validate results.json \
+  --fail-on-category lazy \
+  --fail-on-category hallucinated \
+  --min-confidence 0.8
+```
+
+**When to request a second opinion:**
+- ✅ When all tests pass (100% success rate) - check for lazy or incomplete tests
+- ✅ Before deployment decisions - ensure test quality matches importance
+- ✅ After sudden improvements - verify tests aren't being bypassed
+- ✅ For critical operations - validate test coverage is comprehensive
+
+The judge model detects:
+- **Lazy tests**: Tests with superficial validation (e.g., `assert True`)
+- **Hallucinated tests**: Tests that don't match their description
+- **Incomplete tests**: Missing important assertions
+- **Flaky tests**: Tests with timing or external dependencies
+
 ### Multi-Project Dashboard
 
 Monitor all your projects in a single view:

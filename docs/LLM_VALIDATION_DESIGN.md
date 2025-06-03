@@ -142,6 +142,54 @@ def test_concurrent_operations():
     assert check_async_result()
 ```
 
+## Agent Guidance for Second Opinions
+
+### When Agents Should Request Validation
+
+Agents using claude-test-reporter should request a second opinion from the judge model in these scenarios:
+
+1. **All Tests Pass (100% Success Rate)**
+   - This is a critical trigger - perfect results often hide test quality issues
+   - Command: `claude-test-reporter validate results.json --fail-on-category lazy`
+
+2. **Before Deployment Decisions**
+   - Any deployment recommendation should be validated
+   - Especially important when stakes are high
+
+3. **Sudden Test Improvements**
+   - When previously failing tests suddenly all pass
+   - Could indicate tests were modified rather than code being fixed
+
+4. **Critical Operations**
+   - Financial transactions, security features, data migrations
+   - High-risk features need thorough test validation
+
+### Agent Workflow Example
+
+```bash
+# 1. Agent runs tests
+pytest --json-report --json-report-file=results.json
+
+# 2. Check if validation needed
+if all_tests_passed or critical_feature:
+    echo "🔍 All tests passed - requesting second opinion on test quality..."
+    
+    # 3. Request judge model validation
+    claude-test-reporter validate results.json \
+        --model gemini-2.5-pro \
+        --fail-on-category lazy \
+        --fail-on-category hallucinated \
+        --output validation.json
+    
+    # 4. Check validation results
+    if validation_failed:
+        echo "⚠️ Tests pass but quality issues detected"
+        echo "❌ Cannot recommend deployment"
+    else:
+        echo "✅ Tests pass AND quality verified"
+        echo "✅ Safe to deploy"
+```
+
 ## Usage Examples
 
 ### Basic Usage
