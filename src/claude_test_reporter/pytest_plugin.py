@@ -38,36 +38,64 @@ class ClaudeTestReporterPlugin:
         self.model_name = config.getoption('--claude-model')
         self.output_dir = Path(config.getoption('--claude-output-dir'))
         self.reporter: Optional[TestReporter] = None
+        self.test_results = []
         
         if self.enabled:
-            # Initialize the test reporter
-            report_config = get_report_config()
+            # Use model name as project key
+            project_key = self.model_name or 'default'
+            
+            # Initialize the test reporter with project key
+            report_config = get_report_config(project_key)
             report_config['model_name'] = self.model_name
             report_config['output_dir'] = str(self.output_dir)
-            self.reporter = TestReporter(report_config)
+            
+            # Create output directory if it doesn't exist
+            self.output_dir.mkdir(parents=True, exist_ok=True)
     
     def pytest_runtest_protocol(self, item, nextitem):
         """Hook to track test execution"""
-        if self.enabled and self.reporter:
-            # Record test start
-            self.reporter.start_test(item.nodeid)
+        # Let pytest handle the test execution
+        return None
     
     def pytest_runtest_makereport(self, item, call):
         """Hook to capture test results"""
-        if self.enabled and self.reporter and call.when == 'call':
-            outcome = call.excinfo is None
-            self.reporter.record_result(
-                test_name=item.nodeid,
-                passed=outcome,
-                duration=call.duration,
-                error=str(call.excinfo) if call.excinfo else None
-            )
+        if self.enabled and call.when == 'call':
+            # Record test result
+            outcome = 'passed' if call.excinfo is None else 'failed'
+            self.test_results.append({
+                'test_name': item.nodeid,
+                'outcome': outcome,
+                'duration': call.duration,
+                'error': str(call.excinfo) if call.excinfo else None
+            })
     
     def pytest_sessionfinish(self, session, exitstatus):
         """Hook called after test session finishes"""
-        if self.enabled and self.reporter:
-            # Generate final report
-            self.reporter.generate_report()
+        if self.enabled and self.test_results:
+            # Create simple report
+            total_tests = len(self.test_results)
+            passed_tests = sum(1 for r in self.test_results if r['outcome'] == 'passed')
+            failed_tests = total_tests - passed_tests
+            
+            report_path = self.output_dir / f"{self.model_name}_test_report.txt"
+            
+            with open(report_path, 'w') as f:
+                f.write(f"Test Report for {self.model_name}\n")
+                f.write(f"="*50 + "\n\n")
+                f.write(f"Total Tests: {total_tests}\n")
+                f.write(f"Passed: {passed_tests}\n")
+                f.write(f"Failed: {failed_tests}\n")
+                f.write(f"Success Rate: {(passed_tests/total_tests)*100:.1f}%\n\n")
+                
+                if failed_tests > 0:
+                    f.write("Failed Tests:\n")
+                    for result in self.test_results:
+                        if result['outcome'] == 'failed':
+                            f.write(f"  - {result['test_name']}\n")
+                            if result['error']:
+                                f.write(f"    Error: {result['error']}\n")
+            
+            print(f"\nTest report saved to: {report_path}")
 
 
 def pytest_configure(config):
