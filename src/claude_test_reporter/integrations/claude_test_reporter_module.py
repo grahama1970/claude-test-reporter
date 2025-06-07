@@ -3,6 +3,8 @@ from typing import Dict, Any, List, Optional
 from loguru import logger
 import asyncio
 from datetime import datetime
+Module: claude_test_reporter_module.py
+Description: Test suite for claude_reporter_module functionality
 
 # Import BaseModule from claude_coms
 try:

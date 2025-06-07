@@ -1,3 +1,20 @@
+"""
+Module: test_history_tracker.py
+Description: Test suite for history_tracker functionality
+
+External Dependencies:
+- statistics: [Documentation URL]
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """
 Test History Tracker

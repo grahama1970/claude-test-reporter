@@ -1,5 +1,7 @@
 """
 Report Configuration for SPARTA, Marker, and ArangoDB
+Module: report_config.py
+Description: Configuration management and settings
 
 This configuration file allows easy customization of report settings
 across all projects using the Universal Report Generator.

@@ -1,3 +1,22 @@
+"""
+Module: universal_report_generator.py
+Description: Implementation of universal report generator functionality
+
+External Dependencies:
+- webbrowser: [Documentation URL]
+- socketserver: [Documentation URL]
+- threading: [Documentation URL]
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """
 Universal HTML Report Generator - Generic for any project

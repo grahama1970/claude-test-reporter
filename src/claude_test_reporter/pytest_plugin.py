@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 from claude_test_reporter.core.test_reporter import TestReporter
 from claude_test_reporter.core.report_config import get_report_config
+Module: pytest_plugin.py
+Description: Test suite for pyplugin functionality
 
 
 def pytest_addoption(parser):

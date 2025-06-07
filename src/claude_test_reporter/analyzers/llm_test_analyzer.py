@@ -1,3 +1,20 @@
+"""
+Module: llm_test_analyzer.py
+Description: Test suite for llm_analyzer functionality
+
+External Dependencies:
+- llm_call: [Documentation URL]
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """
 LLM Test Result Analyzer

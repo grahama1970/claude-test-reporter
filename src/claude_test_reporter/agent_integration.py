@@ -1,3 +1,20 @@
+"""
+Module: agent_integration.py
+Description: Implementation of agent integration functionality
+
+External Dependencies:
+- claude_test_reporter: [Documentation URL]
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """
 Agent Integration Module - Clear instructions for Claude Code and other agents.

@@ -1,3 +1,22 @@
+"""
+Module: config.py
+Description: Configuration management and settings
+
+External Dependencies:
+- dataclasses: [Documentation URL]
+- typer: [Documentation URL]
+- rich: [Documentation URL]
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """
 Configuration management for Claude Test Reporter

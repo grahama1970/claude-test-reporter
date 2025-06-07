@@ -1,5 +1,7 @@
 """
 Universal Slash Command and MCP Generation for Typer CLIs
+Module: slash_mcp_mixin.py
+Description: Functions for slash mcp mixin operations
 
 This module provides a simple way to add slash command and MCP server
 generation to any Typer CLI with a single line of code.

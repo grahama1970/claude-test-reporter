@@ -1,3 +1,23 @@
+"""
+Module: main.py
+Description: Functions for main operations
+
+External Dependencies:
+- typer: [Documentation URL]
+- rich: [Documentation URL]
+- claude_test_reporter: [Documentation URL]
+- : [Documentation URL]
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """
 Claude Test Reporter CLI - Typer Version

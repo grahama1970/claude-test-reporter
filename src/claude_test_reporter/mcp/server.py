@@ -1,4 +1,6 @@
 """MCP Server for Claude Test Reporter.
+Module: server.py
+Description: Implementation of server functionality
 
 Provides test reporting capabilities via MCP protocol.
 """

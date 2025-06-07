@@ -2,6 +2,8 @@
 import sys
 from pathlib import Path
 from typing import Optional
+Module: code_review.py
+Description: Functions for code review operations
 
 import click
 from rich.console import Console

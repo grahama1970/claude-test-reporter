@@ -1,3 +1,20 @@
+"""
+Module: agent_report_adapter.py
+Description: Implementation of agent report adapter functionality
+
+External Dependencies:
+- : [Documentation URL]
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """SPARTA Agent Report Adapter - Consumes pytest-json-report output"""
 

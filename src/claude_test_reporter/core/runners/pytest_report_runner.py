@@ -1,3 +1,20 @@
+"""
+Module: pytest_report_runner.py
+Description: Test suite for pyreport_runner functionality
+
+External Dependencies:
+- None (uses only standard library)
+
+Sample Input:
+>>> # Add specific examples based on module functionality
+
+Expected Output:
+>>> # Add expected output examples
+
+Example Usage:
+>>> # Add usage examples
+"""
+
 #!/usr/bin/env python3
 """
 SPARTA Pytest Report Runner - Orchestrates pytest plugins
