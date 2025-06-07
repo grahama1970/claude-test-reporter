@@ -1,5 +1,5 @@
 
-
+"""
 Module: multi_project_dashboard.py
 Description: Implementation of multi project dashboard functionality
 """
@@ -42,11 +42,13 @@ class MultiProjectDashboard:
         self.projects_data = {}
 
     def add_project(self, project_name: str, test_results: Dict[str, Any],
-                   report_url: Optional[str] = None) -> None:
+                   report_url: Optional[str] = None,
+                   analyzer_results: Optional[Dict[str, Any]] = None) -> None:
         """Add project test results to dashboard."""
         self.projects_data[project_name] = {
             "results": test_results,
             "report_url": report_url,
+            "analyzer_results": analyzer_results,
             "added_at": datetime.now().isoformat()
         }
 

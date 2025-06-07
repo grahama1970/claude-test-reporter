@@ -1,5 +1,5 @@
 
-
+"""
 Module: claim_verifier.py
 Description: Verifies that feature claims in README match actual implementation and test coverage
 """

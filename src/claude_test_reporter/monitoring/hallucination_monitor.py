@@ -1,5 +1,5 @@
 
-
+"""
 Module: hallucination_monitor.py
 Description: Implementation of hallucination monitor functionality
 """

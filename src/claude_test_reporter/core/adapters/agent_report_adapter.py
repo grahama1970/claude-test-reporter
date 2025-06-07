@@ -1,5 +1,5 @@
 
-
+"""
 Module: agent_report_adapter.py
 Description: Implementation of agent report adapter functionality
 """

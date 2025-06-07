@@ -1,5 +1,5 @@
 
-
+"""
 Module: universal_report_generator.py
 Description: Implementation of universal report generator functionality
 """

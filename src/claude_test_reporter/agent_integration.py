@@ -1,5 +1,5 @@
 
-
+"""
 Module: agent_integration.py
 Description: Implementation of agent integration functionality
 """

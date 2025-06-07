@@ -1,5 +1,5 @@
 
-
+"""
 Module: config.py
 Description: Configuration management and settings
 """

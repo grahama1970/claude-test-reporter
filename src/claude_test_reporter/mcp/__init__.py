@@ -1,5 +1,5 @@
 
-
+"""
 Module: __init__.py
 Description: Package initialization and exports
 """
