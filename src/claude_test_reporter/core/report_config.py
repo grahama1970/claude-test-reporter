@@ -21,7 +21,7 @@ REPORT_CONFIGS = {
         "base_url": DEFAULT_BASE_URL
     },
     "marker": {
-        "title": "Marker Extraction Report", 
+        "title": "Marker Extraction Report",
         "theme_color": "#10b981",  # Green
         "logo": "📄",
         "base_url": DEFAULT_BASE_URL
@@ -46,11 +46,11 @@ ALTERNATIVE_SERVERS = {
 def get_report_config(project_key: str, base_url_override: Optional[str] = None) -> Dict[str, str]:
     """
     Get report configuration for a specific project.
-    
+
     Args:
         project_key: The key identifier for the project configuration.
         base_url_override: Optional URL to override the default base_url from config.
-        
+
     Returns:
         Dictionary with report configuration
     """
@@ -60,10 +60,10 @@ def get_report_config(project_key: str, base_url_override: Optional[str] = None)
         "logo": "📊",
         "base_url": DEFAULT_BASE_URL
     }).copy()
-    
+
     if base_url_override:
         config["base_url"] = base_url_override
-        
+
     return config
 
 

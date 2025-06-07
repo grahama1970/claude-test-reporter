@@ -1,6 +1,8 @@
-"""
+
+
 Module: test_result_verifier.py
 Description: Test suite for result_verifier functionality
+"""
 
 External Dependencies:
 - None (uses only standard library)
@@ -32,14 +34,14 @@ from pathlib import Path
 
 class TestResultVerifier:
     """Ensures test results cannot be misrepresented."""
-    
+
     def __init__(self):
         self.verification_log = []
-        
+
     def create_immutable_test_record(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
         """
         Create a test record that cannot be misinterpreted.
-        
+
         Returns a record with:
         - Cryptographic hash of results
         - Explicit failure listing
@@ -51,7 +53,7 @@ class TestResultVerifier:
         passed = test_results.get("passed", 0)
         failed = test_results.get("failed", 0)
         skipped = test_results.get("skipped", 0)
-        
+
         # Extract failed test details
         failed_tests = []
         for test in test_results.get("tests", []):
@@ -61,7 +63,7 @@ class TestResultVerifier:
                     "error_type": self._classify_error(test),
                     "must_fix": True
                 })
-        
+
         # Create immutable record
         record = {
             "verification": {
@@ -93,19 +95,19 @@ class TestResultVerifier:
                 f"Any claim contradicting these facts is false"
             ]
         }
-        
+
         # Add cryptographic hash
         record["verification"]["hash"] = self._calculate_hash(record)
-        
+
         # Log verification
         self.verification_log.append({
             "timestamp": record["verification"]["timestamp"],
             "hash": record["verification"]["hash"],
             "failed_count": failed
         })
-        
+
         return record
-    
+
     def _classify_error(self, test: Dict[str, Any]) -> str:
         """Classify the type of test failure."""
         error = str(test.get("error", ""))
@@ -119,30 +121,30 @@ class TestResultVerifier:
             return "connection_error"
         else:
             return "unknown_error"
-    
+
     def _calculate_hash(self, record: Dict[str, Any]) -> str:
         """Calculate SHA256 hash of the record."""
         # Remove hash field for calculation
         record_copy = record.copy()
         if "verification" in record_copy and "hash" in record_copy["verification"]:
             del record_copy["verification"]["hash"]
-        
+
         # Create deterministic JSON string
         json_str = json.dumps(record_copy, sort_keys=True)
         return hashlib.sha256(json_str.encode()).hexdigest()
-    
+
     def verify_record(self, record: Dict[str, Any]) -> bool:
         """Verify a test record hasn't been tampered with."""
         stored_hash = record.get("verification", {}).get("hash", "")
         calculated_hash = self._calculate_hash(record)
         return stored_hash == calculated_hash
-    
+
     def create_llm_prompt_template(self, test_results: Dict[str, Any]) -> str:
         """
         Create a prompt template that forces accurate reporting.
         """
         record = self.create_immutable_test_record(test_results)
-        
+
         prompt = f"""
 You are analyzing test results. You MUST report these EXACT facts:
 
@@ -171,13 +173,13 @@ When responding:
 - Include the verification hash in your response
 """
         return prompt
-    
-    def generate_verification_report(self, 
+
+    def generate_verification_report(self,
                                    test_results: Dict[str, Any],
                                    output_file: str = "verified_test_results.json") -> str:
         """Generate a verification report that cannot be misinterpreted."""
         record = self.create_immutable_test_record(test_results)
-        
+
         # Add instructions for LLMs
         record["llm_instructions"] = {
             "mandatory_statements": [
@@ -193,17 +195,17 @@ When responding:
                 "Do not suggest deployment if any tests fail"
             ]
         }
-        
+
         # Save report
         output_path = Path(output_file)
         output_path.write_text(json.dumps(record, indent=2))
-        
+
         return str(output_path.resolve())
 
 
 class HallucinationDetector:
     """Detects when an LLM hallucinates about test results."""
-    
+
     def __init__(self):
         self.detection_patterns = {
             "rounding_up": r"(\d+\.?\d*)%.*(?:approximately|about|around|nearly)",
@@ -211,19 +213,19 @@ class HallucinationDetector:
             "false_success": r"(ready|safe|okay).*deploy",
             "minimizing": r"(only|just|merely).*\d+.*fail"
         }
-    
-    def check_response(self, 
-                      llm_response: str, 
+
+    def check_response(self,
+                      llm_response: str,
                       actual_record: Dict[str, Any]) -> Dict[str, Any]:
         """
         Check an LLM response for hallucinations about test results.
         """
         detections = []
-        
+
         # Check exact numbers
         actual_failed = actual_record['immutable_facts']['failed_count']
         actual_rate = actual_record['immutable_facts']['exact_success_rate']
-        
+
         # Check if correct failure count is mentioned
         if str(actual_failed) not in llm_response:
             detections.append({
@@ -232,16 +234,16 @@ class HallucinationDetector:
                 "expected": f"{actual_failed} failing tests",
                 "details": "Response doesn't mention exact failure count"
             })
-        
+
         # Check if exact success rate is mentioned
         if f"{actual_rate}%" not in llm_response:
             detections.append({
-                "type": "incorrect_success_rate", 
+                "type": "incorrect_success_rate",
                 "severity": "critical",
                 "expected": f"{actual_rate}%",
                 "details": "Response doesn't state exact success rate"
             })
-        
+
         # Check deployment decision
         if actual_failed > 0 and any(word in llm_response.lower() for word in ["can deploy", "ready to deploy", "deployment allowed"]):
             detections.append({
@@ -250,7 +252,7 @@ class HallucinationDetector:
                 "expected": "Deployment BLOCKED",
                 "details": "Response suggests deployment despite failures"
             })
-        
+
         # Check verification hash
         if actual_record['verification']['hash'] not in llm_response:
             detections.append({
@@ -259,7 +261,7 @@ class HallucinationDetector:
                 "expected": f"Hash: {actual_record['verification']['hash']}",
                 "details": "Response doesn't include verification hash"
             })
-        
+
         return {
             "hallucinations_detected": len(detections) > 0,
             "detection_count": len(detections),
@@ -271,7 +273,7 @@ class HallucinationDetector:
 if __name__ == "__main__":
     # Example usage
     print(f"Validating {__file__}...")
-    
+
     # Sample test results
     test_results = {
         "total": 50,
@@ -286,31 +288,31 @@ if __name__ == "__main__":
             {"nodeid": "test_utils::parse", "outcome": "failed", "error": "ValueError"},
         ]
     }
-    
+
     # Create verifier
     verifier = TestResultVerifier()
-    
+
     # Generate immutable record
     record = verifier.create_immutable_test_record(test_results)
     print("Immutable Record:")
     print(json.dumps(record, indent=2))
-    
+
     # Generate LLM prompt
     prompt = verifier.create_llm_prompt_template(test_results)
     print("\nLLM Prompt Template:")
     print(prompt)
-    
+
     # Test hallucination detection
     detector = HallucinationDetector()
-    
+
     # Good response
     good_response = f"5 tests are failing. Success rate is 90.0%. Deployment is BLOCKED. Hash: {record['verification']['hash']}"
     good_check = detector.check_response(good_response, record)
     print(f"\nGood response verified: {good_check['response_verified']}")
-    
-    # Bad response  
+
+    # Bad response
     bad_response = "Most tests are passing, approximately 90% success rate. Should be okay to deploy with minor fixes."
     bad_check = detector.check_response(bad_response, record)
     print(f"Bad response hallucinations: {bad_check['hallucinations_detected']} ({len(bad_check['detections'])} issues)")
-    
+
     print("\n✅ Test Result Verifier validation complete")

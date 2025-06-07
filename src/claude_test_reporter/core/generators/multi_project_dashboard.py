@@ -1,6 +1,8 @@
-"""
+
+
 Module: multi_project_dashboard.py
 Description: Implementation of multi project dashboard functionality
+"""
 
 External Dependencies:
 - None (uses only standard library)
@@ -33,13 +35,13 @@ from collections import defaultdict
 
 class MultiProjectDashboard:
     """Generate dashboard showing test results across multiple projects."""
-    
+
     def __init__(self, title: str = "Multi-Project Test Dashboard"):
         """Initialize dashboard generator."""
         self.title = title
         self.projects_data = {}
-        
-    def add_project(self, project_name: str, test_results: Dict[str, Any], 
+
+    def add_project(self, project_name: str, test_results: Dict[str, Any],
                    report_url: Optional[str] = None) -> None:
         """Add project test results to dashboard."""
         self.projects_data[project_name] = {
@@ -47,12 +49,12 @@ class MultiProjectDashboard:
             "report_url": report_url,
             "added_at": datetime.now().isoformat()
         }
-    
+
     def load_project_from_json(self, project_name: str, json_path: Path) -> None:
         """Load project test results from pytest JSON report."""
         with open(json_path) as f:
             data = json.load(f)
-        
+
         # Extract key metrics
         tests = data.get("tests", [])
         summary = {
@@ -63,7 +65,7 @@ class MultiProjectDashboard:
             "duration": data.get("duration", 0),
             "created": data.get("created", datetime.now().timestamp())
         }
-        
+
         # Calculate health score
         if summary["total"] > 0:
             summary["success_rate"] = (summary["passed"] / summary["total"]) * 100
@@ -71,7 +73,7 @@ class MultiProjectDashboard:
         else:
             summary["success_rate"] = 0
             summary["health"] = "unknown"
-        
+
         # Store failed test details
         summary["failed_tests"] = [
             {
@@ -81,9 +83,9 @@ class MultiProjectDashboard:
             }
             for t in tests if t["outcome"] == "failed"
         ]
-        
+
         self.add_project(project_name, summary)
-    
+
     def _calculate_health(self, summary: Dict[str, Any]) -> str:
         """Calculate project health status."""
         success_rate = summary["success_rate"]
@@ -93,25 +95,25 @@ class MultiProjectDashboard:
             return "warning"
         else:
             return "critical"
-    
+
     def generate(self, output_file: str = "multi_project_dashboard.html") -> str:
         """Generate the multi-project dashboard."""
         if not self.projects_data:
             raise ValueError("No project data added to dashboard")
-        
+
         # Calculate aggregate metrics
         aggregate = self._calculate_aggregate_metrics()
-        
+
         # Generate HTML
         html_content = self._generate_html(aggregate)
-        
+
         # Write file
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(html_content, encoding='utf-8')
-        
+
         return str(output_path.resolve())
-    
+
     def _calculate_aggregate_metrics(self) -> Dict[str, Any]:
         """Calculate metrics across all projects."""
         total_tests = 0
@@ -119,7 +121,7 @@ class MultiProjectDashboard:
         total_failed = 0
         total_skipped = 0
         total_duration = 0
-        
+
         for project_name, project_data in self.projects_data.items():
             results = project_data["results"]
             total_tests += results.get("total", 0)
@@ -127,7 +129,7 @@ class MultiProjectDashboard:
             total_failed += results.get("failed", 0)
             total_skipped += results.get("skipped", 0)
             total_duration += results.get("duration", 0)
-        
+
         return {
             "total_projects": len(self.projects_data),
             "total_tests": total_tests,
@@ -136,14 +138,14 @@ class MultiProjectDashboard:
             "total_skipped": total_skipped,
             "total_duration": total_duration,
             "overall_success_rate": (total_passed / total_tests * 100) if total_tests > 0 else 0,
-            "healthy_projects": sum(1 for p in self.projects_data.values() 
+            "healthy_projects": sum(1 for p in self.projects_data.values()
                                   if p["results"].get("health") == "healthy"),
-            "warning_projects": sum(1 for p in self.projects_data.values() 
+            "warning_projects": sum(1 for p in self.projects_data.values()
                                   if p["results"].get("health") == "warning"),
-            "critical_projects": sum(1 for p in self.projects_data.values() 
+            "critical_projects": sum(1 for p in self.projects_data.values()
                                    if p["results"].get("health") == "critical")
         }
-    
+
     def _generate_html(self, aggregate: Dict[str, Any]) -> str:
         """Generate the dashboard HTML."""
         # Build project cards
@@ -152,11 +154,11 @@ class MultiProjectDashboard:
             results = project_data["results"]
             health_color = {
                 "healthy": "#10b981",
-                "warning": "#f59e0b", 
+                "warning": "#f59e0b",
                 "critical": "#ef4444",
                 "unknown": "#6b7280"
             }.get(results.get("health", "unknown"), "#6b7280")
-            
+
             # Failed tests list
             failed_tests_html = ""
             if results.get("failed_tests"):
@@ -166,7 +168,7 @@ class MultiProjectDashboard:
                 if len(results.get("failed_tests", [])) > 5:
                     failed_tests_html += f"<li>... and {len(results['failed_tests']) - 5} more</li>"
                 failed_tests_html += "</ul></div>"
-            
+
             # Project card
             project_cards_html += f"""
             <div class="project-card" data-health="{results.get('health', 'unknown')}">
@@ -208,7 +210,7 @@ class MultiProjectDashboard:
                 </div>
             </div>
             """
-        
+
         # Summary cards
         summary_cards_html = f"""
         <div class="summary-card">
@@ -228,7 +230,7 @@ class MultiProjectDashboard:
             <div class="summary-label">Total Duration</div>
         </div>
         """
-        
+
         return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -237,7 +239,7 @@ class MultiProjectDashboard:
     <title>{self.title}</title>
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        body {{ 
+        body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f3f4f6;
             color: #111827;
@@ -438,11 +440,11 @@ class MultiProjectDashboard:
             <h1>📊 {self.title}</h1>
             <p class="subtitle">Last updated: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}</p>
         </header>
-        
+
         <div class="summary-grid">
             {summary_cards_html}
         </div>
-        
+
         <div class="filters">
             <span style="font-weight: 600; margin-right: 10px;">Filter by health:</span>
             <button class="filter-btn active" onclick="filterProjects('all')">All Projects</button>
@@ -450,21 +452,21 @@ class MultiProjectDashboard:
             <button class="filter-btn" onclick="filterProjects('warning')">Warning ({aggregate['warning_projects']})</button>
             <button class="filter-btn" onclick="filterProjects('critical')">Critical ({aggregate['critical_projects']})</button>
         </div>
-        
+
         <div class="projects-grid">
             {project_cards_html}
         </div>
     </div>
-    
+
     <script>
         function filterProjects(health) {{
             const cards = document.querySelectorAll('.project-card');
             const buttons = document.querySelectorAll('.filter-btn');
-            
+
             // Update active button
             buttons.forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            
+
             // Filter cards
             cards.forEach(card => {{
                 if (health === 'all' || card.dataset.health === health) {{
@@ -474,7 +476,7 @@ class MultiProjectDashboard:
                 }}
             }});
         }}
-        
+
         // Auto-refresh every 30 seconds
         setInterval(() => {{
             const subtitle = document.querySelector('.subtitle');
@@ -491,10 +493,10 @@ class MultiProjectDashboard:
 if __name__ == "__main__":
     # Validation example
     print(f"Validating {__file__}...")
-    
+
     # Create dashboard
     dashboard = MultiProjectDashboard()
-    
+
     # Add sample projects
     dashboard.add_project("SPARTA", {
         "total": 100,
@@ -509,7 +511,7 @@ if __name__ == "__main__":
             {"name": "test_parse_html", "duration": 0.5, "file": "tests/test_parse.py"}
         ]
     }, "sparta_report.html")
-    
+
     dashboard.add_project("Marker", {
         "total": 50,
         "passed": 42,
@@ -522,7 +524,7 @@ if __name__ == "__main__":
             {"name": "test_extract_tables", "duration": 2.1, "file": "tests/test_extract.py"}
         ]
     }, "marker_report.html")
-    
+
     dashboard.add_project("ArangoDB", {
         "total": 75,
         "passed": 45,
@@ -536,7 +538,7 @@ if __name__ == "__main__":
             {"name": "test_connection", "duration": 0.1, "file": "tests/test_connection.py"}
         ]
     })
-    
+
     # Generate dashboard
     output_file = dashboard.generate("example_multi_project_dashboard.html")
     print(f"✅ Multi-project dashboard generated: {output_file}")

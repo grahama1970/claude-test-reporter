@@ -21,7 +21,7 @@ except ImportError:
 
 class ClaudeTestReporterModule(BaseModule):
     """Claude Test Reporter module for claude-module-communicator"""
-    
+
     def __init__(self, registry=None):
         super().__init__(
             name="claude_test_reporter",
@@ -29,14 +29,14 @@ class ClaudeTestReporterModule(BaseModule):
             capabilities=['run_tests', 'generate_report', 'analyze_failures', 'get_test_history', 'compare_runs'],
             registry=registry
         )
-        
+
         # REQUIRED ATTRIBUTES
         self.version = "1.0.0"
         self.description = "Test execution and reporting utility"
-        
+
         # Initialize components
         self._initialized = False
-        
+
     async def start(self) -> None:
         """Initialize the module"""
         if not self._initialized:
@@ -44,20 +44,20 @@ class ClaudeTestReporterModule(BaseModule):
                 # Module-specific initialization
                 self._initialized = True
                 logger.info(f"claude_test_reporter module started successfully")
-                
+
             except Exception as e:
                 logger.error(f"Failed to initialize claude_test_reporter module: {{e}}")
                 raise
-    
+
     async def stop(self) -> None:
         """Cleanup resources"""
         logger.info(f"claude_test_reporter module stopped")
-    
+
     async def process(self, request: Dict[str, Any]) -> Dict[str, Any]:
         """Process requests from the communicator"""
         try:
             action = request.get("action")
-            
+
             if action not in self.capabilities:
                 return {
                     "success": False,
@@ -65,16 +65,16 @@ class ClaudeTestReporterModule(BaseModule):
                     "available_actions": self.capabilities,
                     "module": self.name
                 }
-            
+
             # Route to appropriate handler
             result = await self._route_action(action, request)
-            
+
             return {
                 "success": True,
                 "module": self.name,
                 **result
             }
-            
+
         except Exception as e:
             logger.error(f"Error in {{self.name}}: {{e}}")
             return {
@@ -82,20 +82,20 @@ class ClaudeTestReporterModule(BaseModule):
                 "error": str(e),
                 "module": self.name
             }
-    
+
     async def _route_action(self, action: str, request: Dict[str, Any]) -> Dict[str, Any]:
         """Route actions to appropriate handlers"""
-        
+
         # Map actions to handler methods
         handler_name = f"_handle_{{action}}"
         handler = getattr(self, handler_name, None)
-        
+
         if not handler:
             # Default handler for unimplemented actions
             return await self._handle_default(action, request)
-        
+
         return await handler(request)
-    
+
     async def _handle_default(self, action: str, request: Dict[str, Any]) -> Dict[str, Any]:
         """Default handler for unimplemented actions"""
         return {
@@ -163,7 +163,7 @@ class ClaudeTestReporterModule(BaseModule):
             },
             "required": ["action"]
         }
-    
+
     def get_output_schema(self) -> Optional[Dict[str, Any]]:
         """Return the output schema for this module"""
         return {
@@ -184,17 +184,17 @@ def create_claude_test_reporter_module(registry=None) -> ClaudeTestReporterModul
 if __name__ == "__main__":
     # Test the module
     import asyncio
-    
+
     async def test():
         module = ClaudeTestReporterModule()
         await module.start()
-        
+
         # Test basic functionality
         result = await module.process({
             "action": "run_tests"
         })
         print(f"Test result: {{result}}")
-        
+
         await module.stop()
-    
+
     asyncio.run(test())

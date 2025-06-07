@@ -1,6 +1,8 @@
-"""
+
+
 Module: main.py
 Description: Functions for main operations
+"""
 
 External Dependencies:
 - typer: [Documentation URL]
@@ -79,29 +81,29 @@ def from_pytest(
     if not json_file.exists():
         console.print(f"[red]Error:[/red] File not found: {json_file}")
         raise typer.Exit(1)
-    
+
     try:
         with open(json_file) as f:
             data = json.load(f)
-        
+
         # Get config if project specified
         config = get_report_config(project) if project else {}
-        
+
         # Generate report
         generator = UniversalReportGenerator(config)
         html = generator.generate_pytest_report(data)
-        
+
         # Write output
         output.write_text(html)
         console.print(f"[green]✓[/green] Report generated: {output}")
-        
+
         # Show summary
         summary = data.get('summary', {})
         if summary:
             console.print(f"  Total: {summary.get('total', 0)} tests")
             console.print(f"  Passed: {summary.get('passed', 0)}")
             console.print(f"  Failed: {summary.get('failed', 0)}")
-            
+
     except Exception as e:
         console.print(f"[red]Error generating report:[/red] {e}")
         raise typer.Exit(1)
@@ -118,25 +120,25 @@ def from_data(
     if not data_file.exists():
         console.print(f"[red]Error:[/red] File not found: {data_file}")
         raise typer.Exit(1)
-    
+
     try:
         with open(data_file) as f:
             data = json.load(f)
-        
+
         # Create config
         config = {
             'title': title,
             'theme_color': color
         }
-        
+
         # Generate report
         generator = UniversalReportGenerator(config)
         html = generator.generate_from_data(data)
-        
+
         # Write output
         output.write_text(html)
         console.print(f"[green]✓[/green] Report generated: {output}")
-        
+
     except Exception as e:
         console.print(f"[red]Error generating report:[/red] {e}")
         raise typer.Exit(1)
@@ -151,33 +153,33 @@ def analyze(
     if not json_file.exists():
         console.print(f"[red]Error:[/red] File not found: {json_file}")
         raise typer.Exit(1)
-    
+
     try:
         with open(json_file) as f:
             data = json.load(f)
-        
+
         # Create adapter for analysis
         adapter = AgentReportAdapter()
         analysis = adapter.analyze_results(data)
-        
+
         # Display analysis
         console.print("[cyan]Test Analysis[/cyan]")
         console.print()
-        
+
         # Summary table
         table = Table(title="Test Summary")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
-        
+
         summary = data.get('summary', {})
         table.add_row("Total Tests", str(summary.get('total', 0)))
         table.add_row("Passed", str(summary.get('passed', 0)))
         table.add_row("Failed", str(summary.get('failed', 0)))
         table.add_row("Skipped", str(summary.get('skipped', 0)))
         table.add_row("Duration", f"{data.get('duration', 0):.2f}s")
-        
+
         console.print(table)
-        
+
         # Failed tests
         if analysis.get('failed_tests'):
             console.print("\n[red]Failed Tests:[/red]")
@@ -185,13 +187,13 @@ def analyze(
                 console.print(f"  • {test['name']}")
                 if test.get('error'):
                     console.print(f"    {test['error'][:100]}...")
-        
+
         # Recommendations
         if analysis.get('recommendations'):
             console.print("\n[yellow]Recommendations:[/yellow]")
             for rec in analysis['recommendations']:
                 console.print(f"  • {rec}")
-                
+
     except Exception as e:
         console.print(f"[red]Error analyzing results:[/red] {e}")
         raise typer.Exit(1)
@@ -210,10 +212,10 @@ def dashboard(
             if not dir_path.exists():
                 console.print(f"[red]Error:[/red] Directory not found: {dir_path}")
                 raise typer.Exit(1)
-        
+
         # Create dashboard
         dashboard = MultiProjectDashboard()
-        
+
         # Add projects
         for dir_path in project_dirs:
             # Look for test results
@@ -226,14 +228,14 @@ def dashboard(
                 console.print(f"[green]✓[/green] Added project: {dir_path.name}")
             else:
                 console.print(f"[yellow]⚠[/yellow]  No test results found in: {dir_path}")
-        
+
         # Generate dashboard
         html = dashboard.generate(title=title)
-        
+
         # Write output
         output.write_text(html)
         console.print(f"\n[green]✓[/green] Dashboard generated: {output}")
-        
+
     except Exception as e:
         console.print(f"[red]Error creating dashboard:[/red] {e}")
         raise typer.Exit(1)
@@ -249,11 +251,11 @@ def history(
     try:
         tracker = TestHistoryTracker()
         history_data = tracker.get_history(project, days=days)
-        
+
         if not history_data:
             console.print(f"No history found for project: {project}")
             return
-        
+
         # Create history table
         table = Table(title=f"{project} Test History ({days} days)")
         table.add_column("Date", style="cyan")
@@ -261,7 +263,7 @@ def history(
         table.add_column("Passed", style="green")
         table.add_column("Failed", style="red")
         table.add_column("Pass Rate", style="magenta")
-        
+
         for entry in history_data:
             table.add_row(
                 entry['date'],
@@ -270,22 +272,22 @@ def history(
                 str(entry['failed']),
                 f"{entry['pass_rate']:.1f}%"
             )
-        
+
         console.print(table)
-        
+
         # Show trend
         if len(history_data) > 1:
             first_rate = history_data[0]['pass_rate']
             last_rate = history_data[-1]['pass_rate']
             trend = last_rate - first_rate
-            
+
             if trend > 0:
                 console.print(f"\n[green]↑ Pass rate improved by {trend:.1f}%[/green]")
             elif trend < 0:
                 console.print(f"\n[red]↓ Pass rate decreased by {abs(trend):.1f}%[/red]")
             else:
                 console.print("\n[yellow]→ Pass rate unchanged[/yellow]")
-                
+
     except Exception as e:
         console.print(f"[red]Error showing history:[/red] {e}")
         raise typer.Exit(1)
@@ -301,14 +303,14 @@ def format(
     if not json_file.exists():
         console.print(f"[red]Error:[/red] File not found: {json_file}")
         raise typer.Exit(1)
-    
+
     try:
         with open(json_file) as f:
             data = json.load(f)
-        
+
         # Create adapter
         adapter = AgentReportAdapter()
-        
+
         # Format based on style
         if style == "claude":
             formatted = adapter.format_for_claude(data)
@@ -319,14 +321,14 @@ def format(
         else:
             console.print(f"[red]Error:[/red] Unknown style: {style}")
             raise typer.Exit(1)
-        
+
         # Output
         if output:
             output.write_text(formatted)
             console.print(f"[green]✓[/green] Formatted output written to: {output}")
         else:
             console.print(formatted)
-            
+
     except Exception as e:
         console.print(f"[red]Error formatting results:[/red] {e}")
         raise typer.Exit(1)
@@ -351,7 +353,7 @@ def health():
     """Check system health and dependencies."""
     console.print("[cyan]System Health Check[/cyan]")
     console.print()
-    
+
     # Check dependencies
     deps = {
         "jinja2": "Template engine",
@@ -360,7 +362,7 @@ def health():
         "llm_call": "LLM integration",
         "typer": "CLI framework"
     }
-    
+
     all_good = True
     for package, description in deps.items():
         try:
@@ -369,7 +371,7 @@ def health():
         except ImportError:
             console.print(f"[red]✗[/red] {package} ({description}) - Not installed")
             all_good = False
-    
+
     if all_good:
         console.print("\n[green]✓ All dependencies are installed![/green]")
     else:
@@ -386,19 +388,19 @@ def verify_test_results(
     if not json_file.exists():
         console.print(f"[red]Error:[/red] File not found: {json_file}")
         raise typer.Exit(1)
-    
+
     try:
         with open(json_file) as f:
             test_results = json.load(f)
-        
+
         # Create verifier
         verifier = TestResultVerifier()
-        
+
         if format == "json":
             # Create immutable record
             record = verifier.create_immutable_test_record(test_results)
             output.write_text(json.dumps(record, indent=2))
-            
+
             console.print(f"[green]✓[/green] Verified record created: {output}")
             console.print(f"  Hash: {record['verification']['hash'][:16]}...")
             console.print(f"  Failed tests: {record['immutable_facts']['failed_count']}")
@@ -408,7 +410,7 @@ def verify_test_results(
             summary = TestReportVerifier().create_verified_summary(test_results)
             output.write_text(summary)
             console.print(f"[green]✓[/green] Verified summary created: {output}")
-            
+
     except Exception as e:
         console.print(f"[red]Error verifying results:[/red] {e}")
         raise typer.Exit(1)
@@ -426,27 +428,27 @@ def llm_analyze(
     if not json_file.exists():
         console.print(f"[red]Error:[/red] File not found: {json_file}")
         raise typer.Exit(1)
-    
+
     try:
         with open(json_file) as f:
             test_results = json.load(f)
-        
+
         console.print(f"[cyan]Analyzing with {model}...[/cyan]")
-        
+
         # Create analyzer
         analyzer = LLMTestAnalyzer(model=model, temperature=temperature)
-        
+
         # Generate analysis
         report_path = analyzer.generate_anti_hallucination_report(
             test_results, project, str(output)
         )
-        
+
         console.print(f"[green]✓[/green] Analysis complete: {report_path}")
-        
+
         # Load and show key findings
         with open(report_path) as f:
             report = json.load(f)
-        
+
         analysis = report.get("llm_analysis", {})
         if "error" not in analysis:
             # Show summary
@@ -455,7 +457,7 @@ def llm_analyze(
             console.print(f"  Status: {summary.get('overall_status', 'unknown')}")
             console.print(f"  Confidence: {summary.get('confidence_level', 'unknown')}")
             console.print(f"  Deployment Ready: {'Yes' if summary.get('requires_immediate_action') == False else 'No'}")
-            
+
             # Show top recommendations
             recs = analysis.get("recommendations", [])
             if recs:
@@ -464,7 +466,7 @@ def llm_analyze(
                     console.print(f"  {i}. [{rec['priority']}] {rec['action']}")
         else:
             console.print(f"[yellow]Analysis failed: {analysis['error']}[/yellow]")
-            
+
     except Exception as e:
         console.print(f"[red]Error during LLM analysis:[/red] {e}")
         raise typer.Exit(1)
@@ -480,25 +482,25 @@ def check_hallucination(
     if not results_file.exists() or not response_file.exists():
         console.print("[red]Error:[/red] One or more files not found")
         raise typer.Exit(1)
-    
+
     try:
         # Load verified results
         with open(results_file) as f:
             verified_record = json.load(f)
-        
+
         # Load response text
         response_text = response_file.read_text()
-        
+
         # Create detector
         detector = HallucinationDetector()
-        
+
         # Check for hallucinations
         result = detector.check_response(response_text, verified_record)
-        
+
         # Display results
         if result["hallucinations_detected"]:
             console.print(f"[red]❌ Hallucinations detected: {result['detection_count']} issues[/red]\n")
-            
+
             for detection in result["detections"]:
                 severity_color = "red" if detection["severity"] == "critical" else "yellow"
                 console.print(f"[{severity_color}]• {detection['type']}:[/{severity_color}]")
@@ -507,7 +509,7 @@ def check_hallucination(
         else:
             console.print("[green]✓ No hallucinations detected![/green]")
             console.print("The response accurately reflects the test results.")
-        
+
         # Save detailed report if requested
         if output:
             report = {
@@ -518,7 +520,7 @@ def check_hallucination(
             }
             output.write_text(json.dumps(report, indent=2))
             console.print(f"\n[green]✓[/green] Detailed report saved: {output}")
-            
+
     except Exception as e:
         console.print(f"[red]Error checking hallucinations:[/red] {e}")
         raise typer.Exit(1)
@@ -534,17 +536,17 @@ def create_llm_prompt(
     if not json_file.exists():
         console.print(f"[red]Error:[/red] File not found: {json_file}")
         raise typer.Exit(1)
-    
+
     try:
         with open(json_file) as f:
             test_results = json.load(f)
-        
+
         # Create verifier
         verifier = TestResultVerifier()
-        
+
         # Generate prompt
         prompt = verifier.create_llm_prompt_template(test_results)
-        
+
         # Output
         if output:
             output.write_text(prompt)
@@ -552,7 +554,7 @@ def create_llm_prompt(
         else:
             console.print("[bold]LLM Prompt:[/bold]")
             console.print(prompt)
-            
+
     except Exception as e:
         console.print(f"[red]Error creating prompt:[/red] {e}")
         raise typer.Exit(1)
@@ -585,21 +587,21 @@ def judge_command(
 ):
     """
     🧑‍⚖️ REQUEST SECOND OPINION from JUDGE MODEL when all tests pass.
-    
+
     The JUDGE MODEL is an external LLM (Gemini 2.5 Pro) that validates test quality.
-    
+
     WHEN TO USE THIS:
     • ✅ When ALL tests pass (100% success) - most important!
     • ✅ Before deployment decisions
     • ✅ After fixing all test failures
     • ✅ When test results seem too good to be true
-    
+
     The judge detects:
     • Lazy tests (e.g., assert True)
     • Incomplete tests (missing assertions)
     • Hallucinated tests (don't test what they claim)
     • Flaky tests (timing dependencies)
-    
+
     Example:
         claude-test-reporter judge test_results.json
         claude-test-reporter judge test_results.json --strict --model gemini-2.5-pro
@@ -607,55 +609,55 @@ def judge_command(
     if not json_file.exists():
         console.print(f"[red]Error:[/red] File not found: {json_file}")
         raise typer.Exit(1)
-    
+
     try:
         # Load test results
         with open(json_file) as f:
             test_results = json.load(f)
-        
+
         # Check if validation is needed
         summary = test_results.get('summary', {})
         total = summary.get('total', 0)
         failed = summary.get('failed', 0)
-        
+
         if failed == 0 and total > 0:
             console.print("[green]✅ All tests passed![/green]")
             console.print("[yellow]🔍 This is exactly when judge validation is most important![/yellow]\n")
-        
+
         # Create validator
         from claude_test_reporter.core.test_validator import TestValidator
         validator = TestValidator(model=f"gemini/{model}" if "gemini" in model else model)
-        
+
         console.print(f"[cyan]🧑‍⚖️ Requesting second opinion from {model} judge model...[/cyan]\n")
-        
+
         # Validate all tests
         validation_results = validator.validate_all_tests(test_results)
-        
+
         # Save results
         with open(output, 'w') as f:
             json.dump(validation_results, f, indent=2)
-        
+
         # Display summary
         summary = validation_results.get('summary', {})
         problematic = summary.get('problematic_tests', [])
         categories = summary.get('categories', {})
-        
+
         console.print(f"[bold]📋 Judge Model Validation Complete[/bold]")
         console.print(f"Model: {validation_results.get('model')}")
         console.print(f"Tests validated: {validation_results.get('total_tests')}")
         console.print()
-        
+
         # Show categories
         if categories:
             console.print("[bold]Test Quality Categories:[/bold]")
             for category, count in categories.items():
                 icon = "✅" if category == "good" else "⚠️"
                 console.print(f"  {icon} {category}: {count}")
-        
+
         # Check for issues
         quality_issues = ['lazy', 'hallucinated', 'incomplete', 'flaky']
         issues_found = any(cat in categories for cat in quality_issues)
-        
+
         if issues_found and strict:
             console.print(f"\n[red]❌ VALIDATION FAILED - Quality issues detected[/red]")
             console.print(f"[red]Found {len(problematic)} problematic tests[/red]")
@@ -667,9 +669,9 @@ def judge_command(
         else:
             console.print("\n[green]✅ All tests validated - good quality![/green]")
             console.print("[green]Safe to deploy[/green]")
-        
+
         console.print(f"\n[dim]Full validation report saved: {output}[/dim]")
-        
+
     except ImportError:
         console.print("[red]Error: Test validator not available. Install llm_call dependency.[/red]")
         raise typer.Exit(1)

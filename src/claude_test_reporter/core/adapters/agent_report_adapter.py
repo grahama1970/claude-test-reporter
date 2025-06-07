@@ -1,6 +1,8 @@
-"""
+
+
 Module: agent_report_adapter.py
 Description: Implementation of agent report adapter functionality
+"""
 
 External Dependencies:
 - : [Documentation URL]
@@ -33,25 +35,25 @@ except ImportError:
 
 class AgentReportAdapter:
     """Adapt pytest-json-report output for agent consumption."""
-    
+
     def __init__(self, json_report_path: Path, project_name: Optional[str] = None):
         with open(json_report_path) as f:
             self.data = json.load(f)
         self.project_name = project_name or "Unknown"
         self.history_tracker = TestHistoryTracker() if TestHistoryTracker else None
-    
+
     def get_quick_status(self) -> Dict[str, Any]:
         """Get quick pass/fail status for agent decision making."""
         tests = self.data.get("tests", [])
-        
+
         passed = sum(1 for t in tests if t["outcome"] == "passed")
         failed = sum(1 for t in tests if t["outcome"] == "failed")
         skipped = sum(1 for t in tests if t["outcome"] == "skipped")
         total = len(tests)
-        
+
         all_passed = failed + skipped == 0
         success_rate = (passed / total * 100) if total > 0 else 0
-        
+
         return {
             "all_passed": all_passed,
             "requires_action": failed + skipped > 0,
@@ -62,7 +64,7 @@ class AgentReportAdapter:
             "validation_recommended": all_passed and total > 0,
             "validation_reason": "All tests passed - recommend judge model validation for test quality" if all_passed and total > 0 else None
         }
-    
+
     def get_failed_tests(self) -> List[Dict[str, Any]]:
         """Get list of failed tests with details."""
         failed = []
@@ -75,13 +77,13 @@ class AgentReportAdapter:
                     "error_message": self._extract_error_message(test)
                 })
         return failed
-    
+
     def get_actionable_items(self) -> List[Dict[str, Any]]:
         """Get prioritized list of actions to take."""
         actions = []
         status = self.get_quick_status()
         failed_tests = self.get_failed_tests()
-        
+
         # Check if validation is recommended FIRST
         if status.get("validation_recommended", False):
             actions.append({
@@ -92,7 +94,7 @@ class AgentReportAdapter:
                 "suggested_fix": "All tests passed - run judge model validation: claude-test-reporter validate results.json --fail-on-category lazy --fail-on-category hallucinated",
                 "reason": status.get("validation_reason")
             })
-        
+
         # Group by error type
         error_groups = {}
         for test in failed_tests:
@@ -100,7 +102,7 @@ class AgentReportAdapter:
             if error_type not in error_groups:
                 error_groups[error_type] = []
             error_groups[error_type].append(test["test_id"])
-        
+
         # Create actions
         for error_type, test_ids in error_groups.items():
             actions.append({
@@ -110,7 +112,7 @@ class AgentReportAdapter:
                 "count": len(test_ids),
                 "suggested_fix": self._suggest_fix(error_type)
             })
-        
+
         # Add skipped tests
         skipped_count = status["skipped_count"]
         if skipped_count > 0:
@@ -121,7 +123,7 @@ class AgentReportAdapter:
                 "count": skipped_count,
                 "suggested_fix": "Enable skipped tests - they may hide failures"
             })
-        
+
         # Add flaky test detection
         flaky_tests = self.detect_flaky_tests()
         if flaky_tests:
@@ -133,14 +135,14 @@ class AgentReportAdapter:
                 "suggested_fix": "Investigate test instability - these tests have inconsistent results",
                 "details": flaky_tests
             })
-        
+
         return sorted(actions, key=lambda x: 0 if x["priority"] == "critical" else 1 if x["priority"] == "high" else 2)
-    
+
     def _extract_error_type(self, test: Dict[str, Any]) -> str:
         """Extract error type from test failure."""
         call = test.get("call", {})
         longrepr = str(call.get("longrepr", ""))
-        
+
         if "AssertionError" in longrepr:
             return "AssertionError"
         elif "ImportError" in longrepr:
@@ -149,15 +151,15 @@ class AgentReportAdapter:
             return "AttributeError"
         elif "ValueError" in longrepr:
             return "ValueError"
-        
+
         return "UnknownError"
-    
+
     def _extract_error_message(self, test: Dict[str, Any]) -> str:
         """Extract error message from test failure."""
         call = test.get("call", {})
         longrepr = str(call.get("longrepr", ""))
         return longrepr[:200] if longrepr else "No error message available"
-    
+
     def _suggest_fix(self, error_type: str) -> str:
         """Suggest fix based on error type."""
         fixes = {
@@ -169,12 +171,12 @@ class AgentReportAdapter:
             "FlakyTests": "Add retry logic or fix test dependencies"
         }
         return fixes.get(error_type, "Debug the specific error")
-    
+
     def detect_flaky_tests(self, threshold: float = 0.3) -> Dict[str, Dict[str, Any]]:
         """Detect flaky tests based on historical data."""
         if not self.history_tracker:
             return {}
-        
+
         # Add current test run to history
         self.history_tracker.add_test_run(self.project_name, {
             "total": len(self.data.get("tests", [])),
@@ -184,12 +186,12 @@ class AgentReportAdapter:
             "duration": self.data.get("duration", 0),
             "tests": self.data.get("tests", [])
         })
-        
+
         # Get flaky tests from history
         flaky_analysis = self.history_tracker.get_flaky_tests(self.project_name)
         if not flaky_analysis or "tests" not in flaky_analysis:
             return {}
-        
+
         # Filter by threshold
         flaky_tests = {}
         for test_name, data in flaky_analysis["tests"].items():
@@ -200,9 +202,9 @@ class AgentReportAdapter:
                     "recent_pattern": data["recent_pattern"],
                     "severity": "high" if data["flakiness_score"] > 0.7 else "medium"
                 }
-        
+
         return flaky_tests
-    
+
     def get_agent_comparison(self, other_agent_results: Dict[str, Any]) -> Dict[str, Any]:
         """Compare results between two agents to identify differences."""
         comparison = {
@@ -212,17 +214,17 @@ class AgentReportAdapter:
             },
             "differences": []
         }
-        
+
         # Create test result maps
         this_results = {t["nodeid"]: t["outcome"] for t in self.data.get("tests", [])}
         other_results = {t["nodeid"]: t["outcome"] for t in other_agent_results.get("tests", [])}
-        
+
         # Find differences
         all_tests = set(this_results.keys()) | set(other_results.keys())
         for test_id in all_tests:
             this_outcome = this_results.get(test_id, "missing")
             other_outcome = other_results.get(test_id, "missing")
-            
+
             if this_outcome != other_outcome:
                 comparison["differences"].append({
                     "test_id": test_id,
@@ -230,12 +232,12 @@ class AgentReportAdapter:
                     "other_agent": other_outcome,
                     "type": self._categorize_difference(this_outcome, other_outcome)
                 })
-        
+
         comparison["difference_count"] = len(comparison["differences"])
         comparison["agreement_rate"] = (len(all_tests) - len(comparison["differences"])) / len(all_tests) * 100 if all_tests else 100
-        
+
         return comparison
-    
+
     def _categorize_difference(self, outcome1: str, outcome2: str) -> str:
         """Categorize the type of difference between outcomes."""
         if "missing" in [outcome1, outcome2]:
@@ -253,13 +255,13 @@ def analyze_latest_report() -> Dict[str, Any]:
     """Find and analyze the latest pytest JSON report."""
     reports_dir = Path("docs/reports")
     json_reports = list(reports_dir.glob("test_results_*.json"))
-    
+
     if not json_reports:
         return {"error": "No test reports found"}
-    
+
     latest_report = max(json_reports, key=lambda p: p.stat().st_mtime)
     adapter = AgentReportAdapter(latest_report)
-    
+
     return {
         "report_file": str(latest_report),
         "status": adapter.get_quick_status(),

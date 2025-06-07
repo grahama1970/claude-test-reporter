@@ -27,7 +27,7 @@ class GitChanges:
     untracked_files: List[str]
     untracked_contents: Dict[str, str]
     deleted_files: List[str]
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert to dictionary for serialization."""
         return asdict(self)
@@ -35,7 +35,7 @@ class GitChanges:
 
 class GitChangeCollector:
     """Collects and formats git changes for review."""
-    
+
     DEFAULT_REVIEW_PROMPT = """Please review the following code changes and provide:
 1. **Security Analysis**: Identify any security vulnerabilities or concerns
 2. **Performance Review**: Highlight performance issues and optimization opportunities
@@ -49,53 +49,53 @@ class GitChangeCollector:
 10. **Overall Assessment**: Provide a summary and actionable recommendations
 
 Focus on the most important issues first. Be constructive and specific in your feedback."""
-    
+
     def __init__(self, repo_path: Optional[str] = None):
         self.repo_path = Path(repo_path) if repo_path else Path.cwd()
-        
+
     def collect_changes(self) -> GitChanges:
         """Collect all git changes in the repository."""
-        
+
         # Save current directory
         original_cwd = Path.cwd()
-        
+
         try:
             # Change to repo directory
             import os
             os.chdir(self.repo_path)
-            
+
             # Get repository info
             repo_root = self._run_git_command(["git", "rev-parse", "--show-toplevel"])
             repo_name = Path(repo_root.strip()).name
-            
+
             branch = self._run_git_command(["git", "branch", "--show-current"]).strip()
             last_commit = self._run_git_command(["git", "log", "-1", "--oneline"]).strip()
-            
+
             # Get staged changes
             staged_changes = self._run_git_command(["git", "diff", "--cached"])
             if not staged_changes:
                 staged_changes = "No staged changes"
-                
+
             # Get unstaged changes
             unstaged_changes = self._run_git_command(["git", "diff"])
             if not unstaged_changes:
                 unstaged_changes = "No unstaged changes"
-                
+
             # Get untracked files
             untracked_output = self._run_git_command(["git", "ls-files", "--others", "--exclude-standard"])
             untracked_files = [f for f in untracked_output.strip().split('\n') if f]
-            
+
             # Get content of untracked files
             untracked_contents = {}
             for file in untracked_files:
                 content = self._read_file_safely(file)
                 if content:
                     untracked_contents[file] = content
-                    
+
             # Get deleted files
             deleted_output = self._run_git_command(["git", "diff", "--name-only", "--diff-filter=D"])
             deleted_files = [f for f in deleted_output.strip().split('\n') if f]
-            
+
             return GitChanges(
                 repo_name=repo_name,
                 repo_path=str(self.repo_path),
@@ -107,14 +107,14 @@ Focus on the most important issues first. Be constructive and specific in your f
                 untracked_contents=untracked_contents,
                 deleted_files=deleted_files
             )
-            
+
         finally:
             # Restore original directory
             os.chdir(original_cwd)
-    
+
     def format_for_review(self, changes: GitChanges, custom_prompt: Optional[str] = None) -> str:
         """Format git changes into a review request."""
-        
+
         sections = [
             f"=== GIT REPOSITORY STATUS ===",
             f"Repository: {changes.repo_name}",
@@ -127,11 +127,11 @@ Focus on the most important issues first. Be constructive and specific in your f
             "=== STAGED CHANGES ===",
             changes.staged_changes,
             "",
-            "=== UNSTAGED CHANGES ===", 
+            "=== UNSTAGED CHANGES ===",
             changes.unstaged_changes,
             ""
         ]
-        
+
         if changes.untracked_files:
             sections.extend([
                 "=== UNTRACKED FILES ===",
@@ -139,7 +139,7 @@ Focus on the most important issues first. Be constructive and specific in your f
                 "",
                 "=== CONTENT OF UNTRACKED FILES ==="
             ])
-            
+
             for file, content in changes.untracked_contents.items():
                 sections.extend([
                     f"--- File: {file} ---",
@@ -152,7 +152,7 @@ Focus on the most important issues first. Be constructive and specific in your f
                 "No untracked files",
                 ""
             ])
-            
+
         if changes.deleted_files:
             sections.extend([
                 "=== DELETED FILES ===",
@@ -163,20 +163,20 @@ Focus on the most important issues first. Be constructive and specific in your f
                 "=== DELETED FILES ===",
                 "No deleted files"
             ])
-            
+
         return "\n".join(sections)
-    
+
     def get_review_stats(self, changes: GitChanges) -> Dict[str, Any]:
         """Get statistics about the changes."""
-        
+
         # Count lines changed
         staged_lines = self._count_diff_lines(changes.staged_changes)
         unstaged_lines = self._count_diff_lines(changes.unstaged_changes)
-        
+
         # Count files
         staged_files = self._count_diff_files(changes.staged_changes)
         unstaged_files = self._count_diff_files(changes.unstaged_changes)
-        
+
         return {
             "has_changes": any([
                 changes.staged_changes != "No staged changes",
@@ -197,10 +197,10 @@ Focus on the most important issues first. Be constructive and specific in your f
             "untracked_files": len(changes.untracked_files),
             "deleted_files": len(changes.deleted_files),
             "total_files": staged_files + unstaged_files + len(changes.untracked_files),
-            "total_changes": (staged_lines["additions"] + staged_lines["deletions"] + 
+            "total_changes": (staged_lines["additions"] + staged_lines["deletions"] +
                             unstaged_lines["additions"] + unstaged_lines["deletions"])
         }
-    
+
     def _run_git_command(self, command: List[str]) -> str:
         """Run a git command and return output."""
         try:
@@ -213,56 +213,56 @@ Focus on the most important issues first. Be constructive and specific in your f
             return result.stdout
         except subprocess.CalledProcessError:
             return ""
-    
+
     def _read_file_safely(self, filepath: str, max_lines: int = 1000) -> Optional[str]:
         """Safely read a file, skipping binary files."""
         try:
             path = Path(filepath)
-            
+
             # Skip if file is too large
             if path.stat().st_size > 1_000_000:  # 1MB
                 return f"[File too large: {path.stat().st_size:,} bytes]"
-                
+
             # Check if file is text
             with open(path, 'rb') as f:
                 chunk = f.read(1024)
                 if b'\0' in chunk:  # Binary file
                     return None
-                    
+
             # Read text file
             with open(path, 'r', encoding='utf-8', errors='ignore') as f:
                 lines = f.readlines()[:max_lines]
                 if len(lines) == max_lines:
                     lines.append(f"\n[... truncated at {max_lines} lines ...]")
                 return ''.join(lines)
-                
+
         except Exception as e:
             return f"[Error reading file: {e}]"
-    
+
     def _count_diff_lines(self, diff_text: str) -> Dict[str, int]:
         """Count additions and deletions in a diff."""
         if diff_text in ["No staged changes", "No unstaged changes"]:
             return {"additions": 0, "deletions": 0}
-            
+
         additions = sum(1 for line in diff_text.split('\n') if line.startswith('+' ) and not line.startswith('+++' ))
         deletions = sum(1 for line in diff_text.split('\n') if line.startswith('-' ) and not line.startswith('---' ))
-        
+
         return {"additions": additions, "deletions": deletions}
-    
+
     def _count_diff_files(self, diff_text: str) -> int:
         """Count number of files in a diff."""
         if diff_text in ["No staged changes", "No unstaged changes"]:
             return 0
-            
+
         return len([line for line in diff_text.split('\n') if line.startswith('diff --git' )])
 
 
 class CodeReviewReport:
     """Formats and saves code review reports."""
-    
+
     def __init__(self):
         self.timestamp = datetime.now()
-        
+
     def create_report(
         self,
         changes: GitChanges,
@@ -271,7 +271,7 @@ class CodeReviewReport:
         stats: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Create a structured review report."""
-        
+
         return {
             "metadata": {
                 "timestamp": self.timestamp.isoformat(),
@@ -289,20 +289,20 @@ class CodeReviewReport:
                 "deleted": len(changes.deleted_files)
             }
         }
-    
+
     def save_markdown(self, report: Dict[str, Any], filepath: Path):
         """Save report as markdown."""
-        
+
         with open(filepath, 'w') as f:
             f.write(f"# Code Review Report\n\n")
-            
+
             # Metadata
             meta = report["metadata"]
             f.write(f"**Model**: {meta['model']}\n")
             f.write(f"**Repository**: {meta['repository']} ({meta['branch']})  \n")
             f.write(f"**Last Commit**: {meta['last_commit']}\n")
             f.write(f"**Generated**: {meta['timestamp']}\n\n")
-            
+
             # Statistics
             if report.get("statistics"):
                 stats = report["statistics"]
@@ -314,11 +314,11 @@ class CodeReviewReport:
                 f.write(f"- Unstaged: {stats['unstaged']['files']} files\n")
                 f.write(f"- Untracked: {stats.get('untracked_files', 0)} files\n")
                 f.write(f"- Deleted: {stats.get('deleted_files', 0)} files\n\n")
-            
+
             # Review content
             f.write("## Review\n\n")
             f.write(report["review"])
-            
+
     def save_json(self, report: Dict[str, Any], filepath: Path):
         """Save report as JSON."""
         with open(filepath, 'w') as f:

@@ -14,7 +14,7 @@ from .pattern_analyzer import DeceptionPatternAnalyzer
 from .claim_verifier import ClaimVerifier
 
 __all__ = [
-    "LLMTestAnalyzer", 
+    "LLMTestAnalyzer",
     "TestReportVerifier",
     "MockDetector",
     "RealTimeTestMonitor",

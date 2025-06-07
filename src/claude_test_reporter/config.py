@@ -1,6 +1,8 @@
-"""
+
+
 Module: config.py
 Description: Configuration management and settings
+"""
 
 External Dependencies:
 - dataclasses: [Documentation URL]
@@ -44,30 +46,30 @@ class LLMConfig:
 
 class Config:
     """Central configuration management."""
-    
+
     def __init__(self):
         self.config_file = Path.home() / ".claude-test-reporter" / "config.json"
         self.env_file = Path.cwd() / ".env"
         self._config = self._load_config()
-        
+
     def _load_config(self) -> Dict[str, Any]:
         """Load configuration from multiple sources."""
         config = {}
-        
+
         # 1. Load from config file if exists
         if self.config_file.exists():
             with open(self.config_file) as f:
                 config.update(json.load(f))
-        
+
         # 2. Load from .env file if exists
         if self.env_file.exists():
             config.update(self._load_env_file())
-        
+
         # 3. Override with environment variables
         config.update(self._load_env_vars())
-        
+
         return config
-    
+
     def _load_env_file(self) -> Dict[str, str]:
         """Load variables from .env file."""
         env_vars = {}
@@ -78,11 +80,11 @@ class Config:
                     key, value = line.split('=', 1)
                     env_vars[key.strip()] = value.strip().strip('"\'')
         return env_vars
-    
+
     def _load_env_vars(self) -> Dict[str, str]:
         """Load relevant environment variables."""
         env_vars = {}
-        
+
         # LLM-related variables
         llm_keys = [
             "GEMINI_API_KEY",
@@ -93,17 +95,17 @@ class Config:
             "LLM_TEMPERATURE",
             "LLM_MAX_TOKENS"
         ]
-        
+
         for key in llm_keys:
             if key in os.environ:
                 env_vars[key] = os.environ[key]
-        
+
         # Claude test reporter specific
         if "CLAUDE_TEST_REPORTER_CONFIG" in os.environ:
             env_vars["CLAUDE_TEST_REPORTER_CONFIG"] = os.environ["CLAUDE_TEST_REPORTER_CONFIG"]
-        
+
         return env_vars
-    
+
     def get_llm_config(self) -> LLMConfig:
         """Get LLM configuration."""
         # Try different API key sources
@@ -112,7 +114,7 @@ class Config:
             self._config.get("GOOGLE_API_KEY") or
             self._config.get("api_key")
         )
-        
+
         return LLMConfig(
             api_key=api_key,
             model=self._config.get("LLM_MODEL", "gemini-2.5-pro"),
@@ -120,29 +122,29 @@ class Config:
             max_tokens=int(self._config.get("LLM_MAX_TOKENS", 4096)),
             timeout=int(self._config.get("LLM_TIMEOUT", 30))
         )
-    
+
     def validate_llm_config(self) -> tuple[bool, str]:
         """Validate LLM configuration is properly set."""
         llm_config = self.get_llm_config()
-        
+
         if not llm_config.api_key:
             return False, "No API key found. Set GEMINI_API_KEY or GOOGLE_API_KEY environment variable."
-        
+
         if llm_config.temperature < 0 or llm_config.temperature > 1:
             return False, f"Invalid temperature: {llm_config.temperature}. Must be between 0 and 1."
-        
+
         return True, "LLM configuration is valid."
-    
+
     def save_config(self, config_data: Dict[str, Any]) -> None:
         """Save configuration to file."""
         self.config_file.parent.mkdir(parents=True, exist_ok=True)
         with open(self.config_file, 'w') as f:
             json.dump(config_data, f, indent=2)
-    
+
     def get(self, key: str, default: Any = None) -> Any:
         """Get configuration value."""
         return self._config.get(key, default)
-    
+
     def set(self, key: str, value: Any) -> None:
         """Set configuration value."""
         self._config[key] = value
@@ -188,26 +190,26 @@ def setup_environment() -> None:
     import typer
     from rich.console import Console
     from rich.prompt import Prompt, Confirm
-    
+
     console = Console()
-    
+
     console.print("[bold cyan]Claude Test Reporter - Environment Setup[/bold cyan]\n")
-    
+
     # Check if .env exists
     env_file = Path.cwd() / ".env"
     if env_file.exists():
         if not Confirm.ask("A .env file already exists. Overwrite?"):
             console.print("[yellow]Setup cancelled.[/yellow]")
             return
-    
+
     # Collect API key
     console.print("Choose your LLM provider:")
     console.print("1. Google (Gemini)")
     console.print("2. Anthropic (Claude)")
     console.print("3. OpenAI (GPT)")
-    
+
     choice = Prompt.ask("Enter choice", choices=["1", "2", "3"], default="1")
-    
+
     api_key = None
     if choice == "1":
         api_key = Prompt.ask("Enter your Gemini API key", password=True)
@@ -218,21 +220,21 @@ def setup_environment() -> None:
     else:
         api_key = Prompt.ask("Enter your OpenAI API key", password=True)
         key_name = "OPENAI_API_KEY"
-    
+
     # Create .env content
     env_content = create_env_template()
     env_content = env_content.replace(f"{key_name}=your-", f"{key_name}={api_key[:8]}...")
-    
+
     # Additional settings
     if Confirm.ask("Enable hallucination monitoring?", default=True):
         env_content = env_content.replace("ENABLE_HALLUCINATION_MONITORING=true", "ENABLE_HALLUCINATION_MONITORING=true")
     else:
         env_content = env_content.replace("ENABLE_HALLUCINATION_MONITORING=true", "ENABLE_HALLUCINATION_MONITORING=false")
-    
+
     # Save .env file
     env_file.write_text(env_content)
     console.print(f"\n[green]✓[/green] Created .env file: {env_file}")
-    
+
     # Add to .gitignore
     gitignore = Path.cwd() / ".gitignore"
     if gitignore.exists():
@@ -240,7 +242,7 @@ def setup_environment() -> None:
         if ".env" not in content:
             gitignore.write_text(content + "\n.env\n")
             console.print("[green]✓[/green] Added .env to .gitignore")
-    
+
     console.print("\n[bold green]Setup complete![/bold green]")
     console.print("You can now use LLM features with claude-test-reporter.")
 
@@ -248,15 +250,15 @@ def setup_environment() -> None:
 if __name__ == "__main__":
     # Test configuration
     config = Config()
-    
+
     print("Testing configuration loading...")
     llm_config = config.get_llm_config()
     print(f"  Model: {llm_config.model}")
     print(f"  Temperature: {llm_config.temperature}")
     print(f"  API Key: {'Set' if llm_config.api_key else 'Not set'}")
-    
+
     valid, message = config.validate_llm_config()
     print(f"\nValidation: {message}")
-    
+
     if not valid:
         print("\nRun 'claude-test-reporter setup' to configure your environment.")

@@ -19,8 +19,8 @@ console = Console()
 @click.option("--output", "-o", help="Output file path")
 @click.option("--compare", is_flag=True, help="Compare reviews from multiple models")
 @click.option("--verbose", "-v", is_flag=True, help="Verbose output")
-def code_review(repo: str, model: str, custom_prompt: Optional[str], 
-                temperature: float, output: Optional[str], compare: bool, 
+def code_review(repo: str, model: str, custom_prompt: Optional[str],
+                temperature: float, output: Optional[str], compare: bool,
                 verbose: bool) -> None:
     """Perform AI-powered code review on a repository."""
     try:
@@ -28,17 +28,17 @@ def code_review(repo: str, model: str, custom_prompt: Optional[str],
     except ImportError:
         console.print("[red]Error: code_reviewer module not available[/red]")
         sys.exit(1)
-    
+
     reviewer = CodeReviewer(model=model)
     repo_path = Path(repo).resolve()
-    
+
     if not repo_path.exists():
         console.print(f"[red]Repository not found: {repo_path}[/red]")
         sys.exit(1)
-    
+
     console.print(f"[blue]Reviewing repository: {repo_path}[/blue]")
     console.print(f"[blue]Using model: {model}[/blue]")
-    
+
     if compare:
         # Compare multiple models
         models = ["gemini-2.5-pro", "claude-3-5-sonnet-20241022"]
@@ -48,11 +48,11 @@ def code_review(repo: str, model: str, custom_prompt: Optional[str],
             custom_prompt=custom_prompt,
             temperature=temperature
         )
-        
+
         if result["success"]:
             console.print("\n[green]✅ Comparison complete![/green]")
             console.print(f"[blue]📊 Comparison saved to: {result['comparison_path']}[/blue]")
-            
+
             # Show summary
             if verbose:
                 console.print("\n[bold]Review Summary:[/bold]")
@@ -70,7 +70,7 @@ def code_review(repo: str, model: str, custom_prompt: Optional[str],
             temperature=temperature,
             output_path=output
         )
-        
+
         if result["success"]:
             if output:
                 console.print(f"\n[green]✅ Review complete![/green]")

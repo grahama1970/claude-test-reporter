@@ -1,6 +1,8 @@
-"""
+
+
 Module: realtime_monitor.py
 Description: Real-time test execution monitor that actually runs tests and captures output
+"""
 
 External Dependencies:
 - subprocess: https://docs.python.org/3/library/subprocess.html
@@ -37,20 +39,20 @@ import os
 
 class RealTimeTestMonitor:
     """Monitor test execution in real-time to detect lies about test results."""
-    
+
     def __init__(self, timeout: int = 300):
         self.timeout = timeout
         self.suspicious_duration_threshold = 0.01  # Tests faster than this are suspicious
         self.realistic_duration_threshold = 0.1   # Integration tests should be slower
-        
-    def monitor_test_execution(self, project_path: str, 
+
+    def monitor_test_execution(self, project_path: str,
                              test_args: Optional[List[str]] = None,
                              capture_raw: bool = True) -> Dict[str, Any]:
         """Actually run tests and monitor execution in real-time."""
         project_path = Path(project_path)
         if not project_path.exists():
             return {"error": f"Project path not found: {project_path}"}
-            
+
         # Default pytest arguments for detailed output
         if test_args is None:
             test_args = [
@@ -61,10 +63,10 @@ class RealTimeTestMonitor:
                 "-p", "no:cacheprovider",  # Disable cache
                 "--capture=no"  # Don't capture output (we want to see it)
             ]
-            
+
         # Prepare the command
         cmd = [sys.executable, "-m", "pytest"] + test_args
-        
+
         # Find test directory
         test_dirs = [project_path / "tests", project_path / "test"]
         test_dir = None
@@ -72,12 +74,12 @@ class RealTimeTestMonitor:
             if td.exists():
                 test_dir = td
                 break
-                
+
         if test_dir:
             cmd.append(str(test_dir))
         else:
             cmd.append(str(project_path))
-            
+
         # Results structure
         results = {
             "command": " ".join(cmd),
@@ -96,12 +98,12 @@ class RealTimeTestMonitor:
             "execution_time": 0,
             "mocked_test_indicators": []
         }
-        
+
         # Run tests and capture output in real-time
         start_time = time.time()
         output_lines = []
         stderr_lines = []
-        
+
         try:
             # Use Popen for real-time output capture
             process = subprocess.Popen(
@@ -112,31 +114,31 @@ class RealTimeTestMonitor:
                 cwd=str(project_path),
                 env={**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}
             )
-            
+
             # Create queues for output
             stdout_queue = queue.Queue()
             stderr_queue = queue.Queue()
-            
+
             # Thread functions to read output
             def read_stdout():
                 for line in process.stdout:
                     stdout_queue.put(line)
-                    
+
             def read_stderr():
                 for line in process.stderr:
                     stderr_queue.put(line)
-                    
+
             # Start reader threads
             stdout_thread = threading.Thread(target=read_stdout)
             stderr_thread = threading.Thread(target=read_stderr)
             stdout_thread.start()
             stderr_thread.start()
-            
+
             # Process output in real-time
             test_pattern = re.compile(r'^(.*?)::(.*?)\s+(PASSED|FAILED|SKIPPED|ERROR)')
             duration_pattern = re.compile(r'^([\d.]+)s\s+(.*?)::(.*)$')
             import_error_pattern = re.compile(r'(ImportError|ModuleNotFoundError):(.*)$')
-            
+
             # Collect output with timeout
             deadline = time.time() + self.timeout
             while process.poll() is None and time.time() < deadline:
@@ -144,7 +146,7 @@ class RealTimeTestMonitor:
                 try:
                     line = stdout_queue.get(timeout=0.1)
                     output_lines.append(line)
-                    
+
                     # Parse test results
                     test_match = test_pattern.search(line)
                     if test_match:
@@ -154,14 +156,14 @@ class RealTimeTestMonitor:
                             results["passed_tests"] += 1
                         elif status == "FAILED":
                             results["failed_tests"] += 1
-                            
+
                     # Parse durations
                     duration_match = duration_pattern.search(line)
                     if duration_match:
                         duration = float(duration_match.group(1))
                         test_name = f"{duration_match.group(2)}::{duration_match.group(3)}"
                         results["test_durations"][test_name] = duration
-                        
+
                         # Check for suspicious durations
                         if duration < self.suspicious_duration_threshold:
                             results["instant_tests"] += 1
@@ -170,58 +172,58 @@ class RealTimeTestMonitor:
                                 "duration": duration,
                                 "reason": "Completed too fast (likely mocked)"
                             })
-                            
+
                     # Check for import errors
                     import_match = import_error_pattern.search(line)
                     if import_match:
                         results["import_errors"].append(line.strip())
-                        
+
                 except queue.Empty:
                     pass
-                    
+
                 # Check stderr
                 try:
                     line = stderr_queue.get(timeout=0.1)
                     stderr_lines.append(line)
                 except queue.Empty:
                     pass
-                    
+
             # Wait for process to complete
             stdout_thread.join(timeout=1)
             stderr_thread.join(timeout=1)
             process.wait(timeout=1)
-            
+
             results["return_code"] = process.returncode
-            
+
         except subprocess.TimeoutExpired:
             process.kill()
             results["error"] = f"Test execution timed out after {self.timeout}s"
             results["return_code"] = -1
-            
+
         except Exception as e:
             results["error"] = f"Failed to execute tests: {str(e)}"
             results["return_code"] = -1
-            
+
         # Calculate execution time
         results["execution_time"] = time.time() - start_time
-        
+
         # Store raw output if requested
         if capture_raw:
             results["raw_output"] = "".join(output_lines)
             results["stderr"] = "".join(stderr_lines)
-            
+
         # Analyze output for mock indicators
         results["mocked_test_indicators"] = self._detect_mock_indicators(output_lines)
-        
+
         # Check for common lies
         results["lies_detected"] = self._detect_common_lies(results)
-        
+
         return results
-        
+
     def _detect_mock_indicators(self, output_lines: List[str]) -> List[Dict[str, str]]:
         """Detect indicators that tests are using mocks."""
         indicators = []
-        
+
         mock_patterns = [
             (r'Mock.*called', "Mock object was called"),
             (r'patch.*as.*mock', "Using patch decorator"),
@@ -231,7 +233,7 @@ class RealTimeTestMonitor:
             (r'<MagicMock', "MagicMock object in output"),
             (r'unittest\.mock', "unittest.mock import detected")
         ]
-        
+
         for i, line in enumerate(output_lines):
             for pattern, description in mock_patterns:
                 if re.search(pattern, line, re.IGNORECASE):
@@ -240,13 +242,13 @@ class RealTimeTestMonitor:
                         "line": line.strip(),
                         "indicator": description
                     })
-                    
+
         return indicators
-        
+
     def _detect_common_lies(self, results: Dict[str, Any]) -> List[Dict[str, str]]:
         """Detect common patterns of lying about test results."""
         lies = []
-        
+
         # Lie 1: All tests passing with no failures (suspicious)
         if results["total_tests"] > 10 and results["failed_tests"] == 0:
             lies.append({
@@ -254,7 +256,7 @@ class RealTimeTestMonitor:
                 "description": "All tests passing (suspicious for large test suite)",
                 "confidence": 0.7
             })
-            
+
         # Lie 2: Too many instant tests
         instant_ratio = results["instant_tests"] / max(results["total_tests"], 1)
         if instant_ratio > 0.3:
@@ -263,7 +265,7 @@ class RealTimeTestMonitor:
                 "description": f"{instant_ratio:.0%} of tests completed instantly",
                 "confidence": 0.9
             })
-            
+
         # Lie 3: Import errors but tests still "pass"
         if results["import_errors"] and results["passed_tests"] > 0:
             lies.append({
@@ -271,7 +273,7 @@ class RealTimeTestMonitor:
                 "description": "Import errors detected but tests claim to pass",
                 "confidence": 1.0
             })
-            
+
         # Lie 4: No output captured (tests might not have run)
         if not results.get("raw_output") and results["total_tests"] == 0:
             lies.append({
@@ -279,10 +281,10 @@ class RealTimeTestMonitor:
                 "description": "No test output captured - tests may not have run",
                 "confidence": 0.8
             })
-            
+
         return lies
-        
-    def compare_with_reported(self, actual_results: Dict[str, Any], 
+
+    def compare_with_reported(self, actual_results: Dict[str, Any],
                             reported_results: Dict[str, Any]) -> Dict[str, Any]:
         """Compare actual test results with what was reported."""
         discrepancies = {
@@ -290,7 +292,7 @@ class RealTimeTestMonitor:
             "differences": [],
             "trust_score": 1.0
         }
-        
+
         # Compare test counts
         if actual_results["total_tests"] != reported_results.get("total_tests", 0):
             discrepancies["matches"] = False
@@ -300,7 +302,7 @@ class RealTimeTestMonitor:
                 "reported": reported_results.get("total_tests", 0),
                 "severity": "high"
             })
-            
+
         # Compare pass/fail counts
         if actual_results["passed_tests"] != reported_results.get("passed_tests", 0):
             discrepancies["matches"] = False
@@ -310,20 +312,20 @@ class RealTimeTestMonitor:
                 "reported": reported_results.get("passed_tests", 0),
                 "severity": "critical"
             })
-            
+
         # Calculate trust score
         if discrepancies["differences"]:
-            critical_count = sum(1 for d in discrepancies["differences"] 
+            critical_count = sum(1 for d in discrepancies["differences"]
                                if d["severity"] == "critical")
             discrepancies["trust_score"] = max(0, 1 - (critical_count * 0.3))
-            
+
         return discrepancies
 
 
 if __name__ == "__main__":
     # Test the real-time monitor
     monitor = RealTimeTestMonitor()
-    
+
     print("✅ Real-time test monitor validation:")
     print("   - Forces actual pytest execution")
     print("   - Captures output in real-time")

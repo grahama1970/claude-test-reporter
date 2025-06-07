@@ -1,6 +1,8 @@
-"""
+
+
 Module: llm_test_analyzer.py
 Description: Test suite for llm_analyzer functionality
+"""
 
 External Dependencies:
 - llm_call: [Documentation URL]
@@ -37,11 +39,11 @@ except ImportError:
 
 class LLMTestAnalyzer:
     """Analyze test results using external LLM to prevent hallucinations."""
-    
+
     def __init__(self, model: str = "gemini-2.5-pro", temperature: float = 0.1):
         """
         Initialize LLM analyzer.
-        
+
         Args:
             model: LLM model to use
             temperature: Low temperature for factual accuracy
@@ -49,12 +51,12 @@ class LLMTestAnalyzer:
         self.model = model
         self.temperature = temperature
         self.analysis_cache = {}
-        
-    def analyze_test_results(self, test_results: Dict[str, Any], 
+
+    def analyze_test_results(self, test_results: Dict[str, Any],
                            project_name: str) -> Dict[str, Any]:
         """
         Send test results to LLM for analysis.
-        
+
         Returns analysis with:
         - Actual test status verification
         - Failure pattern recognition
@@ -63,10 +65,10 @@ class LLMTestAnalyzer:
         """
         if not call_llm:
             return {"error": "LLM module not available"}
-        
+
         # Prepare structured prompt
         prompt = self._create_analysis_prompt(test_results, project_name)
-        
+
         # Call LLM with structured format
         try:
             response = call_llm(
@@ -75,24 +77,24 @@ class LLMTestAnalyzer:
                 temperature=self.temperature,
                 response_format="json"
             )
-            
+
             analysis = json.loads(response)
             self.analysis_cache[project_name] = analysis
             return analysis
-            
+
         except Exception as e:
             return {"error": f"LLM analysis failed: {str(e)}"}
-    
-    def _create_analysis_prompt(self, test_results: Dict[str, Any], 
+
+    def _create_analysis_prompt(self, test_results: Dict[str, Any],
                                project_name: str) -> str:
         """Create structured prompt for LLM analysis."""
-        
+
         # Extract key metrics
         total_tests = test_results.get("total", 0)
         passed_tests = test_results.get("passed", 0)
         failed_tests = test_results.get("failed", 0)
         skipped_tests = test_results.get("skipped", 0)
-        
+
         # Get failed test details
         failed_test_details = []
         for test in test_results.get("tests", []):
@@ -101,7 +103,7 @@ class LLMTestAnalyzer:
                     "name": test.get("nodeid", "unknown"),
                     "error": test.get("error", "No error message")[:200]
                 })
-        
+
         prompt = f"""
 You are a test result analyzer. Your job is to provide FACTUAL analysis of test results.
 Never claim tests are passing if they are not. Always base your analysis on the actual data.
@@ -157,17 +159,17 @@ Analyze these results and provide a JSON response with the following structure:
 IMPORTANT: Base ALL conclusions strictly on the provided data. Do not make assumptions.
 """
         return prompt
-    
-    def verify_agent_claims(self, agent_output: str, 
+
+    def verify_agent_claims(self, agent_output: str,
                           actual_results: Dict[str, Any]) -> Dict[str, Any]:
         """
         Verify an agent's claims about test results against actual data.
-        
+
         This is the key anti-hallucination feature.
         """
         if not call_llm:
             return {"error": "LLM module not available"}
-        
+
         verification_prompt = f"""
 You are a fact-checker for test result claims. Your job is to verify claims against actual data.
 
@@ -199,7 +201,7 @@ Analyze the agent's claims and provide a JSON response:
     "corrected_summary": "<accurate summary of actual test results>"
 }}
 """
-        
+
         try:
             response = call_llm(
                 prompt=verification_prompt,
@@ -207,13 +209,13 @@ Analyze the agent's claims and provide a JSON response:
                 temperature=0.0,  # Zero temperature for maximum accuracy
                 response_format="json"
             )
-            
+
             return json.loads(response)
-            
+
         except Exception as e:
             return {"error": f"Verification failed: {str(e)}"}
-    
-    def generate_anti_hallucination_report(self, 
+
+    def generate_anti_hallucination_report(self,
                                          test_results: Dict[str, Any],
                                          project_name: str,
                                          output_file: str = "llm_analysis_report.json") -> str:
@@ -221,7 +223,7 @@ Analyze the agent's claims and provide a JSON response:
         Generate a comprehensive report with LLM analysis and verification.
         """
         analysis = self.analyze_test_results(test_results, project_name)
-        
+
         report = {
             "project": project_name,
             "timestamp": datetime.now().isoformat(),
@@ -238,19 +240,19 @@ Analyze the agent's claims and provide a JSON response:
                 "analysis_version": "1.0"
             }
         }
-        
+
         output_path = Path(output_file)
         output_path.write_text(json.dumps(report, indent=2))
-        
+
         return str(output_path.resolve())
 
 
 class TestReportVerifier:
     """Verify test reports before sending to agents to prevent hallucinations."""
-    
+
     def __init__(self):
         self.verification_history = []
-    
+
     def create_verified_summary(self, test_results: Dict[str, Any]) -> str:
         """
         Create a fact-based summary that agents cannot misinterpret.
@@ -258,7 +260,7 @@ class TestReportVerifier:
         total = test_results.get("total", 0)
         passed = test_results.get("passed", 0)
         failed = test_results.get("failed", 0)
-        
+
         summary = f"""
 VERIFIED TEST RESULTS - DO NOT MODIFY OR INTERPRET DIFFERENTLY:
 ==============================================================
@@ -274,18 +276,18 @@ CRITICAL FACTS:
 
 Failed Tests List:
 """
-        
+
         # Add each failed test explicitly
         for test in test_results.get("tests", []):
             if test.get("outcome") == "failed":
                 summary += f"- {test.get('nodeid', 'unknown')}: FAILED\n"
-        
+
         summary += """
 ==============================================================
 Any claim that contradicts these facts is a hallucination.
 """
         return summary
-    
+
     def create_structured_report_for_llm(self, test_results: Dict[str, Any]) -> Dict[str, Any]:
         """
         Create a structured report format that minimizes hallucination risk.
@@ -305,8 +307,8 @@ Any claim that contradicts these facts is a hallucination.
                     "failure_rate_percent": round((test_results.get("failed", 0) / test_results.get("total", 1)) * 100, 2)
                 },
                 "failed_test_names": [
-                    t.get("nodeid", "unknown") 
-                    for t in test_results.get("tests", []) 
+                    t.get("nodeid", "unknown")
+                    for t in test_results.get("tests", [])
                     if t.get("outcome") == "failed"
                 ],
                 "deployment_status": "BLOCKED" if test_results.get("failed", 0) > 0 else "READY"
@@ -324,7 +326,7 @@ Any claim that contradicts these facts is a hallucination.
 if __name__ == "__main__":
     # Example usage
     print(f"Validating {__file__}...")
-    
+
     # Create sample test data
     test_results = {
         "total": 100,
@@ -338,16 +340,16 @@ if __name__ == "__main__":
             # ... more tests
         ]
     }
-    
+
     # Test verifier
     verifier = TestReportVerifier()
     verified_summary = verifier.create_verified_summary(test_results)
     print("Verified Summary:")
     print(verified_summary)
-    
+
     # Test structured report
     structured = verifier.create_structured_report_for_llm(test_results)
     print("\nStructured Report:")
     print(json.dumps(structured, indent=2))
-    
+
     print("\n✅ LLM Test Analyzer validation complete")

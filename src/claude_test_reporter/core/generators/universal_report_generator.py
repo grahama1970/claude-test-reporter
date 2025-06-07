@@ -1,6 +1,8 @@
-"""
+
+
 Module: universal_report_generator.py
 Description: Implementation of universal report generator functionality
+"""
 
 External Dependencies:
 - webbrowser: [Documentation URL]
@@ -41,15 +43,15 @@ import re
 
 class UniversalReportGenerator:
     """Generate beautiful HTML reports with sort, search, and export features."""
-    
-    def __init__(self, 
+
+    def __init__(self,
                  title: str = "Data Report",
                  theme_color: str = "#667eea", # Default SPARTA-like purple
                  logo: str = "📊",
                  base_url: Optional[str] = None): # base_url for serving, not part of config by default
         """
         Initialize report generator.
-        
+
         Args:
             title: Report title
             theme_color: Primary color for the report
@@ -75,18 +77,18 @@ class UniversalReportGenerator:
                  column_order: Optional[List[str]] = None) -> str:
         """
         Generate HTML report from data.
-        
+
         Args:
             data: List of dictionaries with your data
             output_file: Output HTML filename
             summary_stats: Optional summary statistics to display as cards
             group_by: Optional field to group data by
             column_order: Optional list to specify column order. Undefined columns appear after.
-            
+
         Returns:
             Path to generated HTML file
         """
-        
+
         if not data:
             # Handle empty data case: generate a report saying "No data"
             columns = []
@@ -98,20 +100,20 @@ class UniversalReportGenerator:
         else:
             # Auto-detect columns from the first data item
             columns = list(data[0].keys())
-        
+
         if not summary_stats:
             summary_stats = self._auto_generate_summary(data, group_by)
-        
+
         grouped_data = {}
         if group_by and group_by in columns and data : # Check data is not empty for grouping
             grouped_data = self._group_data(data, group_by)
-        
+
         html_content = self._generate_html(data, columns, summary_stats, grouped_data, group_by)
-        
+
         output_path = Path(output_file)
         output_path.parent.mkdir(parents=True, exist_ok=True) # Ensure output directory exists
         output_path.write_text(html_content, encoding='utf-8')
-        
+
         return str(output_path.resolve()) # Use resolve for absolute path
 
     def _auto_generate_summary(self, data: List[Dict[str, Any]], group_by: Optional[str]) -> Dict[str, Any]:
@@ -133,13 +135,13 @@ class UniversalReportGenerator:
             grouped[key].append(row)
         return grouped
 
-    def _generate_html(self, 
-                       data: List[Dict[str, Any]], 
+    def _generate_html(self,
+                       data: List[Dict[str, Any]],
                        columns: List[str],
                        summary_stats: Dict[str, Any],
                        grouped_data: Dict[str, List[Dict]],
                        group_by_field: Optional[str]) -> str:
-        
+
         table_rows_html = ""
         if data: # Only generate rows if data exists
             for i, row_data in enumerate(data):
@@ -149,7 +151,7 @@ class UniversalReportGenerator:
                     cell_class = self._get_cell_class(col_name, value)
                     table_rows_html += f"  <td class='{cell_class}'>{self._format_value(value)}</td>\n"
                 table_rows_html += "</tr>\n"
-        
+
         summary_cards_html = ""
         for label_text, stat_value in summary_stats.items():
             card_class_str = self._get_card_class(label_text)
@@ -159,7 +161,7 @@ class UniversalReportGenerator:
                 <div class="stat-label">{label_text}</div>
             </div>
             """
-        
+
         group_summary_html = ""
         if grouped_data and data: # Ensure data is not empty for percentages
             group_summary_html = f"<div class='group-summary'><h3>Summary by {group_by_field.replace('_',' ').title() if group_by_field else 'Group'}</h3><div class='group-grid'>"
@@ -273,7 +275,7 @@ class UniversalReportGenerator:
             sortAsc = (sortColumn === columnIndex) ? !sortAsc : true;
             sortColumn = columnIndex;
             headers[columnIndex].querySelector('.sort-icon').textContent = sortAsc ? '▲' : '▼';
-            
+
             const currentVisibleRows = Array.from(tbody.rows).map(r => initialRows[parseInt(r.dataset.index)]);
             currentVisibleRows.sort((a, b) => {{
                 const aVal = a.data[columnIndex], bVal = b.data[columnIndex];
@@ -342,7 +344,7 @@ class UniversalReportGenerator:
         # Type-based classes
         if isinstance(value, (int, float)): base_class = "cell-number"
         elif value_str.startswith(('http://', 'https://')): base_class = "cell-url"
-        
+
         # Content-based classes (can override type-based for emphasis)
         status_keywords = {
             "success": ["success", "complete", "pass", "passed", "active", "true", "yes", "✅"],
@@ -353,11 +355,11 @@ class UniversalReportGenerator:
         for status_type, keywords in status_keywords.items():
             if any(keyword in value_str for keyword in keywords):
                 return f"{base_class} cell-{status_type}".strip()
-        
+
         # Date-like patterns (very basic)
         if re.search(r'\d{4}-\d{2}-\d{2}|\d{1,2}/\d{1,2}/\d{2,4}', value_str) and len(value_str) < 30:
             return f"{base_class} cell-date".strip()
-            
+
         return base_class.strip()
 
     def _get_card_class(self, label: str) -> str:
@@ -399,7 +401,7 @@ class UniversalReportGenerator:
         parsed_url = urllib.parse.urlparse(self.base_url or "http://localhost:8000")
         host = parsed_url.hostname or "localhost"
         final_port = port if port is not None else parsed_url.port or 8000
-        
+
         # Handler that serves files from the report's directory
         class ReportHTTPRequestHandler(http.server.SimpleHTTPRequestHandler):
             def __init__(self, *args, **kwargs):
@@ -414,20 +416,20 @@ class UniversalReportGenerator:
             try:
                 httpd = socketserver.TCPServer((host, current_port_try), ReportHTTPRequestHandler)
                 final_port = current_port_try # Update port if successful
-                break 
+                break
             except OSError as e:
                 if e.errno == 98: # Address already in use
                     print(f"Port {current_port_try} is in use, trying next...")
                 else:
                     raise # Re-raise other OS errors
-        
+
         if httpd is None:
             print(f"Could not find an available port near {final_port}. Cannot start server.")
             return f"file://{report_abs_path}" # Fallback to file URL
 
         server_thread = threading.Thread(target=httpd.serve_forever, daemon=True)
         server_thread.start()
-        
+
         # Ensure relative path for URL construction if base_url is just host:port
         # The actual file to be served
         served_url = f"http://{host}:{final_port}/{report_filename}"
@@ -435,18 +437,18 @@ class UniversalReportGenerator:
         print(f"\n📊 Report server started. Access at: {served_url}")
         print(f"   Local file: {report_abs_path}")
         print("   Press Ctrl+C in this terminal to stop the server.")
-        
+
         try:
             webbrowser.open(served_url)
         except Exception as e_browser:
             print(f"   Could not open browser automatically: {e_browser}")
-        
+
         return served_url
 
 # Example usage (can be removed or kept for testing the generator)
 if __name__ == "__main__":
     print("🚀 Generating example reports using UniversalReportGenerator...\n")
-    
+
     # Example 1: SPARTA-like data
     sparta_data_example = [
         {"URL": "https://sparta.aerospace.org/t1", "Domain": "sparta.aerospace.org", "Status": "Success ✅", "Size": 102400},
@@ -467,10 +469,10 @@ if __name__ == "__main__":
     generic_gen = UniversalReportGenerator(title="Generic Data Insights", theme_color="#007bff", logo="💡")
     generic_file = generic_gen.generate(generic_data_example, "example_generic_report.html", group_by="Category")
     print(f"✅ Generic Report: {generic_file}")
-    
+
     print("\n📊 All example reports generated successfully!")
     # Open the first one if a server can be started for it
-    # sparta_gen.serve_report(sparta_file) 
+    # sparta_gen.serve_report(sparta_file)
     # To run the server and keep it alive, you'd typically run this serve command in a way that doesn't exit immediately.
     # For this example, just opening the file directly is fine:
     webbrowser.open(f"file://{Path(sparta_file).resolve()}")

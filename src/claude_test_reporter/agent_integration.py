@@ -1,6 +1,8 @@
-"""
+
+
 Module: agent_integration.py
 Description: Implementation of agent integration functionality
+"""
 
 External Dependencies:
 - claude_test_reporter: [Documentation URL]
@@ -32,15 +34,15 @@ from typing import Dict, Any, Optional, Tuple, List
 class AgentTestValidator:
     """
     High-level test validation orchestrator for AI agents.
-    
+
     This class provides clear, unambiguous instructions about when to call
     the judge model and how to interpret results.
     """
-    
+
     # Decision tree for agents
     DECISION_RULES = """
     TEST VALIDATION DECISION TREE FOR AGENTS:
-    
+
     1. Run tests → Get results
     2. Check results:
        - Any failures? → FIX THEM FIRST (no judge needed yet)
@@ -50,31 +52,31 @@ class AgentTestValidator:
        - Judge approves? → SAFE TO DEPLOY ✅
        - Judge finds issues? → FIX QUALITY ISSUES ❌
     """
-    
+
     def __init__(self, test_results_path: Path):
         """Initialize with test results."""
         self.results_path = test_results_path
         self.test_data = self._load_results()
-        
+
     def _load_results(self) -> Dict[str, Any]:
         """Load test results from file."""
         if not self.results_path.exists():
             return {"error": "No test results found"}
-        
+
         with open(self.results_path) as f:
             return json.load(f)
-    
+
     def analyze_and_decide(self) -> Dict[str, Any]:
         """
         Main entry point for agents. Returns explicit instructions.
-        
+
         Returns a dictionary with:
         - decision: What to do (RUN_JUDGE, FIX_TESTS, etc.)
         - commands: List of commands to execute
         - explanation: Human-readable explanation
         - deployment_safe: Boolean indicating if deployment is safe
         """
-        
+
         # Check for errors
         if "error" in self.test_data:
             return {
@@ -84,13 +86,13 @@ class AgentTestValidator:
                 "deployment_safe": False,
                 "judge_needed": False
             }
-        
+
         summary = self.test_data.get('summary', {})
         total = summary.get('total', 0)
         passed = summary.get('passed', 0)
         failed = summary.get('failed', 0)
         skipped = summary.get('skipped', 0)
-        
+
         # CASE 1: Tests are failing
         if failed > 0:
             return {
@@ -104,7 +106,7 @@ class AgentTestValidator:
                     "pass_rate": f"{(passed/total*100):.1f}%" if total > 0 else "0%"
                 }
             }
-        
+
         # CASE 2: All tests pass - JUDGE VALIDATION REQUIRED!
         if failed == 0 and total > 0 and skipped == 0:
             return {
@@ -123,7 +125,7 @@ class AgentTestValidator:
                     "reason": "Perfect results often hide lazy or incomplete tests"
                 }
             }
-        
+
         # CASE 3: Tests with skipped
         if skipped > 0:
             return {
@@ -133,7 +135,7 @@ class AgentTestValidator:
                 "deployment_safe": False,
                 "judge_needed": False
             }
-        
+
         # CASE 4: No tests
         if total == 0:
             return {
@@ -143,7 +145,7 @@ class AgentTestValidator:
                 "deployment_safe": False,
                 "judge_needed": False
             }
-        
+
         # Shouldn't reach here
         return {
             "decision": "UNKNOWN",
@@ -152,14 +154,14 @@ class AgentTestValidator:
             "deployment_safe": False,
             "judge_needed": False
         }
-    
+
     def interpret_judge_results(self, judge_output_path: Path) -> Dict[str, Any]:
         """
         Interpret judge validation results for agents.
-        
+
         Args:
             judge_output_path: Path to judge validation results
-            
+
         Returns:
             Clear interpretation with deployment decision
         """
@@ -168,14 +170,14 @@ class AgentTestValidator:
                 "error": "Judge results not found",
                 "deployment_safe": False
             }
-        
+
         with open(judge_output_path) as f:
             judge_results = json.load(f)
-        
+
         summary = judge_results.get('summary', {})
         categories = summary.get('categories', {})
         problematic_tests = summary.get('problematic_tests', [])
-        
+
         # Check for quality issues
         quality_issues = {
             "lazy": categories.get('lazy', 0),
@@ -183,9 +185,9 @@ class AgentTestValidator:
             "incomplete": categories.get('incomplete', 0),
             "flaky": categories.get('flaky', 0)
         }
-        
+
         total_issues = sum(quality_issues.values())
-        
+
         if total_issues > 0:
             return {
                 "decision": "BLOCK_DEPLOYMENT",
@@ -197,13 +199,13 @@ class AgentTestValidator:
             }
         else:
             return {
-                "decision": "APPROVE_DEPLOYMENT", 
+                "decision": "APPROVE_DEPLOYMENT",
                 "deployment_safe": True,
                 "explanation": "✅ All tests passed AND judge validated quality. Safe to deploy!",
                 "quality_issues": quality_issues,
                 "action_required": None
             }
-    
+
     @staticmethod
     def get_agent_instructions() -> str:
         """
@@ -263,7 +265,7 @@ claude-test-reporter judge test_results.json
 
 def create_integration_example():
     """Create a complete example for agents."""
-    
+
     example = """
 # Complete Agent Workflow Example
 
@@ -275,39 +277,39 @@ from claude_test_reporter.agent_integration import AgentTestValidator
 
 def handle_test_validation():
     '''Complete test validation workflow for agents.'''
-    
+
     # Step 1: Run tests
     print("🧪 Running tests...")
     result = subprocess.run(
         ["pytest", "--json-report", "--json-report-file=test_results.json"],
         capture_output=True
     )
-    
+
     # Step 2: Analyze results
     print("📊 Analyzing test results...")
     validator = AgentTestValidator(Path("test_results.json"))
     decision = validator.analyze_and_decide()
-    
+
     print(f"\\nDecision: {decision['decision']}")
     print(f"Explanation: {decision['explanation']}")
-    
+
     # Step 3: Act based on decision
     if decision['decision'] == 'CALL_JUDGE':
         print("\\n🧑‍⚖️ Calling judge for validation...")
-        
+
         # Run judge command
         judge_cmd = decision['commands'][0]
         judge_result = subprocess.run(
             judge_cmd.split(),
             capture_output=True
         )
-        
+
         if judge_result.returncode == 0:
             # Interpret judge results
             judge_decision = validator.interpret_judge_results(
                 Path("judge_validation.json")
             )
-            
+
             if judge_decision['deployment_safe']:
                 print("\\n✅ DEPLOYMENT APPROVED")
                 print("All tests pass AND quality verified!")
@@ -316,11 +318,11 @@ def handle_test_validation():
                 print("\\n❌ DEPLOYMENT BLOCKED")
                 print(f"Reason: {judge_decision['explanation']}")
                 return False
-    
+
     elif decision['decision'] == 'FIX_FAILURES':
         print("\\n❌ Cannot proceed - fix test failures first")
         return False
-    
+
     # Default: not safe to deploy
     return False
 
@@ -337,16 +339,16 @@ if __name__ == "__main__":
 def should_call_judge(test_results_path: str) -> Tuple[bool, str]:
     """
     Simple function for agents to check if judge validation is needed.
-    
+
     Args:
         test_results_path: Path to test results JSON
-        
+
     Returns:
         (should_call_judge, reason)
     """
     validator = AgentTestValidator(Path(test_results_path))
     decision = validator.analyze_and_decide()
-    
+
     if decision['decision'] == 'CALL_JUDGE':
         return True, decision['explanation']
     else:

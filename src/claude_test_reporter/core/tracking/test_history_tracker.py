@@ -1,6 +1,8 @@
-"""
+
+
 Module: test_history_tracker.py
 Description: Test suite for history_tracker functionality
+"""
 
 External Dependencies:
 - statistics: [Documentation URL]
@@ -33,7 +35,7 @@ import statistics
 
 class TestHistoryTracker:
     """Track and analyze test results over time."""
-    
+
     def __init__(self, storage_dir: str = ".test_history"):
         """Initialize tracker with storage directory."""
         self.storage_dir = Path(storage_dir)
@@ -41,25 +43,25 @@ class TestHistoryTracker:
         self.history_file = self.storage_dir / "test_history.json"
         self.flaky_tests_file = self.storage_dir / "flaky_tests.json"
         self.history = self._load_history()
-        
+
     def _load_history(self) -> Dict[str, List[Dict[str, Any]]]:
         """Load test history from storage."""
         if self.history_file.exists():
             with open(self.history_file) as f:
                 return json.load(f)
         return {}
-    
+
     def _save_history(self) -> None:
         """Save test history to storage."""
         with open(self.history_file, 'w') as f:
             json.dump(self.history, f, indent=2)
-    
-    def add_test_run(self, project_name: str, test_results: Dict[str, Any], 
+
+    def add_test_run(self, project_name: str, test_results: Dict[str, Any],
                      run_id: Optional[str] = None) -> None:
         """Add a test run to history."""
         if project_name not in self.history:
             self.history[project_name] = []
-        
+
         # Create run record
         run_record = {
             "run_id": run_id or datetime.now().isoformat(),
@@ -73,7 +75,7 @@ class TestHistoryTracker:
             },
             "tests": {}
         }
-        
+
         # Store individual test results
         for test in test_results.get("tests", []):
             test_name = test.get("nodeid", test.get("name", "unknown"))
@@ -82,23 +84,23 @@ class TestHistoryTracker:
                 "duration": test.get("duration", 0),
                 "error": test.get("error", None)
             }
-        
+
         # Add to history (keep last 100 runs)
         self.history[project_name].append(run_record)
         self.history[project_name] = self.history[project_name][-100:]
-        
+
         self._save_history()
         self._analyze_flaky_tests(project_name)
-    
-    def get_test_trends(self, project_name: str, test_name: str, 
+
+    def get_test_trends(self, project_name: str, test_name: str,
                        days: int = 7) -> Dict[str, Any]:
         """Get trends for a specific test over time."""
         if project_name not in self.history:
             return {"error": "Project not found"}
-        
+
         cutoff_date = datetime.now() - timedelta(days=days)
         relevant_runs = []
-        
+
         for run in self.history[project_name]:
             run_time = datetime.fromisoformat(run["timestamp"])
             if run_time >= cutoff_date and test_name in run["tests"]:
@@ -107,14 +109,14 @@ class TestHistoryTracker:
                     "outcome": run["tests"][test_name]["outcome"],
                     "duration": run["tests"][test_name]["duration"]
                 })
-        
+
         if not relevant_runs:
             return {"error": "No data for this test in the specified period"}
-        
+
         # Calculate trends
         outcomes = [r["outcome"] for r in relevant_runs]
         durations = [r["duration"] for r in relevant_runs if r["duration"] > 0]
-        
+
         trends = {
             "test_name": test_name,
             "period_days": days,
@@ -134,7 +136,7 @@ class TestHistoryTracker:
             },
             "recent_runs": relevant_runs[-10:]  # Last 10 runs
         }
-        
+
         # Detect performance regression
         if len(durations) >= 5:
             recent_avg = statistics.mean(durations[-5:])
@@ -142,45 +144,45 @@ class TestHistoryTracker:
             if recent_avg > overall_avg * 1.5:
                 trends["performance_regression"] = True
                 trends["regression_factor"] = recent_avg / overall_avg
-        
+
         return trends
-    
+
     def _analyze_flaky_tests(self, project_name: str) -> None:
         """Analyze and identify flaky tests."""
         if project_name not in self.history or len(self.history[project_name]) < 3:
             return
-        
+
         # Analyze last 20 runs
         recent_runs = self.history[project_name][-20:]
         test_outcomes = defaultdict(list)
-        
+
         # Collect outcomes for each test
         for run in recent_runs:
             for test_name, test_data in run["tests"].items():
                 test_outcomes[test_name].append(test_data["outcome"])
-        
+
         # Identify flaky tests
         flaky_tests = {}
         for test_name, outcomes in test_outcomes.items():
             if len(outcomes) < 3:
                 continue
-                
+
             unique_outcomes = set(outcomes)
             # Test is flaky if it has mixed results
             if len(unique_outcomes) > 1 and "passed" in unique_outcomes and "failed" in unique_outcomes:
                 passed_count = outcomes.count("passed")
                 failed_count = outcomes.count("failed")
                 total_runs = len(outcomes)
-                
+
                 # Calculate flakiness score (0-1, higher is more flaky)
                 flakiness = 1 - abs(passed_count - failed_count) / total_runs
-                
+
                 # Track recent pattern
                 recent_pattern = "".join(
-                    "P" if o == "passed" else "F" if o == "failed" else "S" 
+                    "P" if o == "passed" else "F" if o == "failed" else "S"
                     for o in outcomes[-10:]
                 )
-                
+
                 flaky_tests[test_name] = {
                     "flakiness_score": round(flakiness, 3),
                     "pass_rate": round(passed_count / total_runs * 100, 1),
@@ -190,42 +192,42 @@ class TestHistoryTracker:
                     "last_outcome": outcomes[-1],
                     "detected_at": datetime.now().isoformat()
                 }
-        
+
         # Save flaky tests analysis
         if flaky_tests:
             all_flaky_tests = {}
             if self.flaky_tests_file.exists():
                 with open(self.flaky_tests_file) as f:
                     all_flaky_tests = json.load(f)
-            
+
             all_flaky_tests[project_name] = {
                 "updated_at": datetime.now().isoformat(),
                 "tests": flaky_tests
             }
-            
+
             with open(self.flaky_tests_file, 'w') as f:
                 json.dump(all_flaky_tests, f, indent=2)
-    
+
     def get_flaky_tests(self, project_name: Optional[str] = None) -> Dict[str, Any]:
         """Get flaky tests for a project or all projects."""
         if not self.flaky_tests_file.exists():
             return {}
-        
+
         with open(self.flaky_tests_file) as f:
             all_flaky_tests = json.load(f)
-        
+
         if project_name:
             return all_flaky_tests.get(project_name, {})
         return all_flaky_tests
-    
+
     def get_project_health_history(self, project_name: str, days: int = 30) -> List[Dict[str, Any]]:
         """Get project health metrics over time."""
         if project_name not in self.history:
             return []
-        
+
         cutoff_date = datetime.now() - timedelta(days=days)
         health_history = []
-        
+
         for run in self.history[project_name]:
             run_time = datetime.fromisoformat(run["timestamp"])
             if run_time >= cutoff_date:
@@ -239,31 +241,31 @@ class TestHistoryTracker:
                         "failed_tests": summary.get("failed", 0),
                         "duration": summary.get("duration", 0)
                     })
-        
+
         return health_history
-    
+
     def generate_history_report(self, project_name: str, output_file: str = "test_history_report.html") -> str:
         """Generate HTML report showing test history and trends."""
         if project_name not in self.history:
             raise ValueError(f"No history found for project: {project_name}")
-        
+
         # Get data
         health_history = self.get_project_health_history(project_name, days=30)
         flaky_tests = self.get_flaky_tests(project_name)
-        
+
         # Generate charts data
         dates = [h["timestamp"][:10] for h in health_history[-14:]]  # Last 14 days
         success_rates = [h["success_rate"] for h in health_history[-14:]]
-        
+
         # Generate HTML
         html_content = self._generate_history_html(project_name, health_history, flaky_tests, dates, success_rates)
-        
+
         output_path = Path(output_file)
         output_path.write_text(html_content, encoding='utf-8')
-        
+
         return str(output_path.resolve())
-    
-    def _generate_history_html(self, project_name: str, health_history: List[Dict], 
+
+    def _generate_history_html(self, project_name: str, health_history: List[Dict],
                               flaky_tests: Dict, dates: List[str], success_rates: List[float]) -> str:
         """Generate the history report HTML."""
         # Flaky tests table
@@ -282,7 +284,7 @@ class TestHistoryTracker:
                 </tr>
                 """
             flaky_tests_html += "</tbody></table>"
-        
+
         return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -314,7 +316,7 @@ class TestHistoryTracker:
     <div class="container">
         <h1>📈 {project_name} - Test History Report</h1>
         <p style="color: #6b7280; margin-bottom: 30px;">Generated: {datetime.now().strftime("%B %d, %Y at %I:%M %p")}</p>
-        
+
         <div class="summary">
             <div class="stat-card">
                 <div class="stat-value">{len(health_history)}</div>
@@ -329,47 +331,47 @@ class TestHistoryTracker:
                 <div class="stat-label">Flaky Tests Detected</div>
             </div>
         </div>
-        
+
         <div class="chart-container">
             <h2>📊 Success Rate Trend (Last 14 Days)</h2>
             <div class="svg-chart">
                 {self._generate_svg_chart(dates, success_rates)}
             </div>
         </div>
-        
+
         {flaky_tests_html}
     </div>
-    
+
 </body>
 </html>"""
-    
+
     def _generate_svg_chart(self, dates: List[str], values: List[float]) -> str:
         """Generate SVG line chart for success rates."""
         if not dates or not values:
             return '<p style="text-align: center; color: #6b7280;">No data available</p>'
-        
+
         # Chart dimensions
         width = 800
         height = 300
         padding = 40
         chart_width = width - 2 * padding
         chart_height = height - 2 * padding
-        
+
         # Calculate points
         points = []
         x_step = chart_width / (len(values) - 1) if len(values) > 1 else 0
         y_scale = chart_height / 100  # 0-100% scale
-        
+
         for i, value in enumerate(values):
             x = padding + i * x_step
             y = padding + (100 - value) * y_scale
             points.append((x, y))
-        
+
         # Create path
         path_data = f"M {points[0][0]},{points[0][1]}"
         for x, y in points[1:]:
             path_data += f" L {x},{y}"
-        
+
         # Generate SVG
         svg = f'''<svg viewBox="0 0 {width} {height}" xmlns="http://www.w3.org/2000/svg">
             <!-- Grid lines -->
@@ -383,7 +385,7 @@ class TestHistoryTracker:
                 <!-- Vertical line -->
                 <line x1="{padding}" y1="{padding}" x2="{padding}" y2="{height-padding}" />
             </g>
-            
+
             <!-- Y-axis labels -->
             <g fill="#6b7280" font-size="12" text-anchor="end">
                 <text x="{padding-5}" y="{padding+4}">100%</text>
@@ -392,33 +394,33 @@ class TestHistoryTracker:
                 <text x="{padding-5}" y="{padding + 3*chart_height/4 + 4}">25%</text>
                 <text x="{padding-5}" y="{height-padding+4}">0%</text>
             </g>
-            
+
             <!-- Line chart -->
             <path d="{path_data}" fill="none" stroke="#10b981" stroke-width="3" />
-            
+
             <!-- Data points -->
             <g fill="#10b981">
         '''
-        
+
         for i, (x, y) in enumerate(points):
             svg += f'<circle cx="{x}" cy="{y}" r="4" />'
             if i < len(dates) and i % max(1, len(dates) // 7) == 0:  # Show every nth date
                 svg += f'<text x="{x}" y="{height-padding+20}" text-anchor="middle" font-size="11" fill="#6b7280">{dates[i]}</text>'
-        
+
         svg += '''
             </g>
         </svg>'''
-        
+
         return svg
 
 
 if __name__ == "__main__":
     # Validation example
     print(f"Validating {__file__}...")
-    
+
     # Create tracker
     tracker = TestHistoryTracker()
-    
+
     # Add sample test runs
     for i in range(5):
         tracker.add_test_run("ExampleProject", {
@@ -433,13 +435,13 @@ if __name__ == "__main__":
                 {"nodeid": "test_feature_c", "outcome": "failed" if i < 2 else "passed", "duration": 2.1},
             ]
         })
-    
+
     # Get trends
     trends = tracker.get_test_trends("ExampleProject", "test_feature_b", days=30)
     print(f"Test trends: {trends}")
-    
+
     # Get flaky tests
     flaky = tracker.get_flaky_tests("ExampleProject")
     print(f"Flaky tests: {flaky}")
-    
+
     print("✅ Test History Tracker validation passed")
