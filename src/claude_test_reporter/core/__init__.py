@@ -1,18 +1,28 @@
-
 """
 Core functionality for Claude Test Reporter.
 
 Module: __init__.py
 Description: Package initialization and exports
-"""
 
 Sample Input:
->>> # Add specific examples based on module functionality
+>>> from claude_test_reporter.core import TestReporter
+>>> reporter = TestReporter()
 
 Expected Output:
->>> # Add expected output examples
+>>> print(reporter)
+<TestReporter instance>
 
 Example Usage:
->>> # Add usage examples
+>>> from claude_test_reporter.core import TestReporter
+>>> reporter = TestReporter()
+>>> reporter.run_tests('/path/to/project')
 """
 
+# Export main classes
+__all__ = [
+    'TestReporter',
+    'MultiProjectDashboard',
+    'EnhancedMultiProjectDashboard',
+    'UniversalReportGenerator',
+    'TestResultVerifier'
+]

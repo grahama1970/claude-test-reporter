@@ -169,18 +169,18 @@ class UniversalReportGenerator:
             sorted_groups = sorted(grouped_data.items(), key=lambda item: len(item[1]), reverse=True)
             for group_name_str, items_list in sorted_groups[:10]:
                 percentage_val = (len(items_list) / len(data) * 100) if data else 0
-                group_summary_html += f"""
-                <div class="group-item">
-                    <div class="group-name">{self._format_value(group_name_str)}</div>
-                    <div class="group-stats">
-                        <span class="group-count">{len(items_list)} items</span>
-                        <span class="group-percent">{percentage_val:.1f}%</span>
-                    </div>
-                    <div class="group-bar">
-                        <div class="group-bar-fill" style="width: {percentage_val}%;"></div>
-                    </div>
-                </div>
-                """
+                group_summary_html += (
+                    f'<div class="group-item">'
+                    f'<div class="group-name">{self._format_value(group_name_str)}</div>'
+                    f'<div class="group-stats">'
+                    f'<span class="group-count">{len(items_list)} items</span>'
+                    f'<span class="group-percent">{percentage_val:.1f}%</span>'
+                    f'</div>'
+                    f'<div class="group-bar">'
+                    f'<div class="group-bar-fill" style="width: {percentage_val}%;"></div>'
+                    f'</div>'
+                    f'</div>'
+                )
             group_summary_html += "</div></div>"
             if len(sorted_groups) > 10:
                 group_summary_html += f"<p class='more-groups-note'>... and {len(sorted_groups) - 10} more groups.</p>"
@@ -194,7 +194,7 @@ class UniversalReportGenerator:
             column_headers_html = "<th>No data to display</th>"
 
 
-        # Using f-string for the main template structure for clarity
+        # Using string template to avoid f-string issues with CSS
         return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -204,7 +204,7 @@ class UniversalReportGenerator:
     <style>
         * {{ margin: 0; padding: 0; box-sizing: border-box; }}
         body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif; background: #f4f7f6; color: #333; line-height: 1.6; }}
-        .container {{ max-width: 95%; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }}
+        .container {{ max-width: 95%%; margin: 20px auto; padding: 20px; background: #fff; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.08); }}
         header {{ background: {self.theme_color}; color: white; padding: 30px 20px; border-radius: 8px 8px 0 0; text-align: center; }}
         header h1 {{ font-size: 2.2em; margin-bottom: 5px; }}
         header .subtitle {{ font-size: 1em; opacity: 0.9; }}
@@ -214,15 +214,15 @@ class UniversalReportGenerator:
         .stat-label {{ color: #555; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }}
         .controls {{ display: flex; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f9fafd; border-radius: 8px; border: 1px solid #e7eaf3; align-items: center; flex-wrap: wrap; }}
         .search-box {{ flex-grow: 1; position: relative; }}
-        .search-input {{ width: 100%; padding: 10px 35px 10px 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; }}
-        .search-icon {{ position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #888; }}
+        .search-input {{ width: 100%%; padding: 10px 35px 10px 15px; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; }}
+        .search-icon {{ position: absolute; right: 10px; top: 50%%; transform: translateY(-50%%); color: #888; }}
         .btn {{ padding: 10px 15px; border: none; border-radius: 6px; font-size: 0.9em; font-weight: 500; cursor: pointer; transition: background-color 0.2s; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; }}
         .btn-primary {{ background: {self.theme_color}; color: white; }}
         .btn-primary:hover {{ background-color: #556bb0; }} /* Darker shade of theme_color */
         .btn-secondary {{ background: #e9ecef; color: #333; }}
         .btn-secondary:hover {{ background: #ced4da; }}
         .table-container {{ overflow-x: auto; border: 1px solid #e7eaf3; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }}
-        table {{ width: 100%; border-collapse: collapse; min-width: 600px; }}
+        table {{ width: 100%%; border-collapse: collapse; min-width: 600px; }}
         th {{ background: #f9fafd; padding: 10px 12px; text-align: left; font-weight: 600; cursor: pointer; user-select: none; border-bottom: 2px solid #dee2e6; }}
         th .sort-icon {{ float: right; color: #aaa; font-size: 0.8em; }}
         td {{ padding: 10px 12px; border-bottom: 1px solid #f1f3f5; }}
@@ -240,11 +240,11 @@ class UniversalReportGenerator:
         .group-name {{ font-weight: 500; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
         .group-stats {{ display: flex; justify-content: space-between; font-size: 0.85em; color: #666; margin-bottom: 6px; }}
         .group-bar {{ height: 5px; background: #e9ecef; border-radius: 2.5px; overflow: hidden; }}
-        .group-bar-fill {{ height: 100%; background: {self.theme_color}; transition: width 0.3s; }}
+        .group-bar-fill {{ height: 100%%; background: {self.theme_color}; transition: width 0.3s; }}
         .more-groups-note {{ font-size: 0.85em; color: #777; margin-top: 10px; text-align: center; }}
         .info-bar {{ margin-top: 20px; padding: 10px; background: #f9fafd; border-radius: 6px; text-align: center; font-size: 0.9em; color: #666; border: 1px solid #e7eaf3; }}
         .highlight {{ background-color: #fff3cd; font-weight: bold; }}
-        @media (max-width: 768px) {{ .controls {{ flex-direction: column; align-items: stretch; }} .btn {{ width: 100%; margin-bottom: 5px; }} }}
+        @media (max-width: 768px) {{ .controls {{ flex-direction: column; align-items: stretch; }} .btn {{ width: 100%%; margin-bottom: 5px; }} }}
     </style>
 </head>
 <body>
