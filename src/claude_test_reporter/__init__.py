@@ -1,6 +1,9 @@
-"""Claude Test Reporter - Universal test reporting engine for Claude companion projects."""
+"""
+Claude Test Reporter - Universal test reporting engine for Claude companion projects.
+
 Module: __init__.py
 Description: Package initialization and exports
+"""
 
 # Import core functionality
 from claude_test_reporter.core.test_reporter import TestReporter
