@@ -1,6 +1,6 @@
 """
-Code Reviewer - Orchestrates git reviews using claude_max_proxy for LLM calls
 Module: code_reviewer.py
+Code Reviewer - Orchestrates git reviews using claude_max_proxy for LLM calls
 Description: Implementation of code reviewer functionality
 
 This module acts as the integration layer between git change collection

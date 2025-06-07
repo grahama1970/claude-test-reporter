@@ -2,10 +2,9 @@
 """
 Module: agent_report_adapter.py
 Description: Implementation of agent report adapter functionality
-"""
 
 External Dependencies:
-- : [Documentation URL]
+- None (uses only standard library)
 
 Sample Input:
 >>> # Add specific examples based on module functionality

@@ -2,6 +2,8 @@
 """
 Module: integration_tester.py
 Description: Actually tests integration between modules by starting them and sending real messages
+
+"""
 """
 
 External Dependencies:

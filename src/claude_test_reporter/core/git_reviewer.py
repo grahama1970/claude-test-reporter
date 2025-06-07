@@ -1,6 +1,6 @@
 """
-Git Change Reviewer - Collects git changes and formats them for review
 Module: git_reviewer.py
+Git Change Reviewer - Collects git changes and formats them for review
 Description: Implementation of git reviewer functionality
 
 This module handles all git operations and change collection.

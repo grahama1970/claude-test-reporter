@@ -1,7 +1,7 @@
 """
+Module: __init__.py
 Core functionality for Claude Test Reporter.
 
-Module: __init__.py
 Description: Package initialization and exports
 
 Sample Input:

@@ -2,6 +2,8 @@
 """
 Module: mock_detector.py
 Description: Detects inappropriate mock usage in test files, especially in integration tests
+
+"""
 """
 
 External Dependencies:

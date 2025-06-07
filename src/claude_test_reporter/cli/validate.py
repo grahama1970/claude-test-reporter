@@ -1,9 +1,12 @@
-"""Validation command for test results using LLM."""
+"""
+Module: validate.py
+
+Validation command for test results using LLM.
+"""
 import json
 import sys
 from pathlib import Path
 from typing import Optional
-Module: validate.py
 Description: Functions for validate operations
 
 import click

@@ -3,6 +3,8 @@
 Module: comprehensive_analyzer.py
 Description: Orchestrates all lie detection analyzers for comprehensive project analysis
 
+"""
+
 External Dependencies:
 - None (uses local analyzers)
 

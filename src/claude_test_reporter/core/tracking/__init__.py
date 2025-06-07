@@ -1,7 +1,7 @@
 """
+Module: __init__.py
 Test tracking and history modules.
 
-Module: __init__.py
 Description: Package initialization and exports
 """
 

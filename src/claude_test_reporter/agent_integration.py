@@ -2,7 +2,6 @@
 """
 Module: agent_integration.py
 Description: Implementation of agent integration functionality
-"""
 
 External Dependencies:
 - claude_test_reporter: [Documentation URL]

@@ -2,6 +2,8 @@
 """
 Module: pattern_analyzer.py
 Description: Analyzes deception patterns across multiple projects to identify systematic lying
+
+"""
 """
 
 External Dependencies:

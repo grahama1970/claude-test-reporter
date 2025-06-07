@@ -2,6 +2,8 @@
 """
 Module: honeypot_enforcer.py
 Description: Enforces that honeypot tests fail as designed, detecting when Claude makes them pass
+
+"""
 """
 
 External Dependencies:

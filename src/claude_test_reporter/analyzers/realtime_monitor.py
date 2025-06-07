@@ -2,6 +2,8 @@
 """
 Module: realtime_monitor.py
 Description: Real-time test execution monitor that actually runs tests and captures output
+
+"""
 """
 
 External Dependencies:

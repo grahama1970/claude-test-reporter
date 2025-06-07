@@ -1,7 +1,7 @@
 """
+Module: __init__.py
 Claude Test Reporter - Universal test reporting engine for Claude companion projects.
 
-Module: __init__.py
 Description: Package initialization and exports
 """
 

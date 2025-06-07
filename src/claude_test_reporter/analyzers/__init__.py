@@ -1,7 +1,7 @@
 """
+Module: __init__.py
 Test result analyzers including LLM integration.
 
-Module: __init__.py
 Description: Package initialization and exports
 """
 

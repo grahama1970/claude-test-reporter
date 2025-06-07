@@ -1,6 +1,6 @@
 """
-Report Configuration for SPARTA, Marker, and ArangoDB
 Module: report_config.py
+Report Configuration for SPARTA, Marker, and ArangoDB
 Description: Configuration management and settings
 
 This configuration file allows easy customization of report settings

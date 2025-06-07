@@ -1,7 +1,7 @@
 """
+Module: __init__.py
 Monitoring modules for hallucination detection.
 
-Module: __init__.py
 Description: Package initialization and exports
 """
 

@@ -1,11 +1,14 @@
-"""Automated test report generator for SPARTA."""
+"""
+Module: test_reporter.py
+Description: Test suite for reporter functionality
+
+Automated test report generator for SPARTA.
+"""
 import subprocess
 import json
 from datetime import datetime
 from pathlib import Path
 import sys
-Module: test_reporter.py
-Description: Test suite for reporter functionality
 
 class TestReporter:
     """Generate Markdown reports from pytest results."""

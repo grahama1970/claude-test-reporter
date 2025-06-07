@@ -194,15 +194,15 @@ class MultiProjectDashboard:
                         <span class="metric-label">Failed</span>
                     </div>
                     <div class="metric">
-                        <span class="metric-value">{results.get('success_rate', 0):.1f}%</span>
+                        <span class="metric-value">{results.get('success_rate', 0):.1f}{'%'}</span>
                         <span class="metric-label">Success Rate</span>
                     </div>
                 </div>
                 <div class="project-progress">
                     <div class="progress-bar">
-                        <div class="progress-fill passed" style="width: {results.get('passed', 0) / max(results.get('total', 1), 1) * 100}%"></div>
-                        <div class="progress-fill failed" style="width: {results.get('failed', 0) / max(results.get('total', 1), 1) * 100}%"></div>
-                        <div class="progress-fill skipped" style="width: {results.get('skipped', 0) / max(results.get('total', 1), 1) * 100}%"></div>
+                        <div class="progress-fill passed" style="width: {results.get('passed', 0) / max(results.get('total', 1), 1) * 100}{'%'}"></div>
+                        <div class="progress-fill failed" style="width: {results.get('failed', 0) / max(results.get('total', 1), 1) * 100}{'%'}"></div>
+                        <div class="progress-fill skipped" style="width: {results.get('skipped', 0) / max(results.get('total', 1), 1) * 100}{'%'}"></div>
                     </div>
                 </div>
                 {failed_tests_html}
@@ -224,7 +224,7 @@ class MultiProjectDashboard:
             <div class="summary-label">Total Tests</div>
         </div>
         <div class="summary-card">
-            <div class="summary-value" style="color: #10b981">{aggregate['overall_success_rate']:.1f}%</div>
+            <div class="summary-value" style="color: #10b981">{aggregate['overall_success_rate']:.1f}{'%'}</div>
             <div class="summary-label">Overall Success Rate</div>
         </div>
         <div class="summary-card">

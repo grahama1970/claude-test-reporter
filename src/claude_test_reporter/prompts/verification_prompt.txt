@@ -1,0 +1,25 @@
+You are analyzing test results. You MUST report these EXACT facts:
+
+IMMUTABLE TEST RESULTS:
+=======================
+{immutable_facts}
+
+FAILED TESTS REQUIRING FIXES:
+{failed_test_details}
+
+DEPLOYMENT DECISION:
+{deployment_decision}
+
+VERIFICATION HASH: {verification_hash}
+
+RULES:
+1. You MUST state that {failed_count} tests are failing
+2. You MUST report the exact success rate: {exact_success_rate}%
+3. You MUST state deployment is {deployment_status}
+4. Any deviation from these facts is a hallucination
+
+When responding:
+- Quote the exact numbers above
+- List all failed tests by name
+- State the deployment decision clearly
+- Include the verification hash in your response
